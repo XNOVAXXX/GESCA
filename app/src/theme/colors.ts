@@ -1,13 +1,23 @@
-// Paleta PROVISIONAL. Reemplazar con los códigos oficiales de la I.U. Pascual Bravo (RNF05).
+// Paleta institucional de la I.U. Pascual Bravo (RNF05).
+const institucional = {
+  blanco: '#FFFFFF',
+  negro: '#000000',
+  gris: '#666666',
+  azul: '#1E87F0',
+  azulNoche: '#001B33',
+  celeste: '#3FB8FD',
+} as const;
+
 export const colors = {
-  primario: '#00594F',
-  primarioOscuro: '#003D36',
-  secundario: '#F2A900',
-  fondo: '#F5F7F6',
-  superficie: '#FFFFFF',
-  texto: '#1C2321',
-  textoSuave: '#5B6662',
-  borde: '#D5DDDA',
+  primario: institucional.azul,
+  primarioOscuro: institucional.azulNoche,
+  acento: institucional.celeste,
+  fondo: institucional.blanco,
+  superficie: institucional.blanco,
+  texto: institucional.negro,
+  textoSuave: institucional.gris,
+  borde: '#66666633', // gris institucional al 20 %
+  // Colores de estado (no hacen parte de la paleta; solo para mensajes de éxito, alerta y error).
   exito: '#2E7D32',
   advertencia: '#B26A00',
   error: '#C62828',

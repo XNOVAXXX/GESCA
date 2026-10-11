@@ -7,6 +7,13 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.fondo,
     padding: spacing.md,
   },
+  logo: {
+    width: 277,
+    height: 72,
+    maxWidth: '100%',
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
   titulo: {
     ...typography.titulo,
     color: colors.primarioOscuro,
@@ -14,6 +21,8 @@ export const styles = StyleSheet.create({
   },
   tarjeta: {
     backgroundColor: colors.superficie,
+    borderLeftColor: colors.acento,
+    borderLeftWidth: 4,
     borderColor: colors.borde,
     borderWidth: 1,
     borderRadius: radius.md,

@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native';
 import { colors } from '@/theme';
 import type { DisponibilidadProps } from './useDisponibilidad';
 import { styles } from './Disponibilidad.styles';
@@ -14,6 +14,12 @@ const NOMBRE_TIPO = {
 export function DisponibilidadView({ espacios, cargando, error, recargar, solicitar }: DisponibilidadProps) {
   return (
     <View style={styles.contenedor}>
+      <Image
+        source={require('../../../../assets/logo-pascual-bravo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+        accessibilityLabel="Institución Universitaria Pascual Bravo"
+      />
       <Text style={styles.titulo}>Espacios disponibles</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {cargando ? (
