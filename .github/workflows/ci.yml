@@ -34,7 +34,7 @@ jobs:
             node ../supabase/tests/acceso.test.mjs
 
   app:
-    name: App (tipos + reglas de separación)
+    name: App (tipos, reglas de separación y pruebas unitarias)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,3 +49,4 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm test -- --ci

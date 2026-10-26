@@ -60,10 +60,21 @@ cp .env.example .env       # pegar la URL y la llave anon que imprime `supabase 
 npm install
 npm run web                # o: npm run android / npm run ios
 npm run lint && npm run typecheck
+npm test                   # pruebas unitarias (Jest)
 ```
 
 Todo cambio a la base de datos se hace con una migración nueva (`supabase migration new <nombre>`),
 nunca desde el panel web.
+
+## Pruebas unitarias
+
+Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren con `npm test` dentro de `app/`.
+
+| Archivo | Qué prueba |
+|---|---|
+| `src/domain/reglas.test.ts` | Reglas de negocio en pantalla: 2 horas, 15 días, 24 horas para cancelar, enrutamiento RN05, correo y código |
+| `src/services/auth.service.test.ts` | Ingreso con contraseña y con código, con Supabase simulado (no necesita internet) |
+| `src/features/acceso/ingresar/useIngresar.test.ts` | Lógica de la pantalla de ingreso: validaciones, navegación al panel y errores |
 
 ## Acceso de usuarios
 
