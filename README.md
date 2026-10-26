@@ -72,8 +72,11 @@ Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren c
 
 | Archivo | Pruebas |
 |---|---|
-| `src/domain/reglas.test.ts` | 1. Rechaza más de 2 horas · 2. Rechaza más de 15 días de anticipación · 3. No cancela con menos de 24 horas · 4. Correo externo va a Coordinación |
+| `src/domain/reglas.test.ts` | 1. Rechaza más de 2 horas · 2. Rechaza más de 15 días de anticipación · 4. Correo externo va a Coordinación |
+| `src/services/reservas.service.test.ts` | 3. Un cruce de horario muestra un mensaje claro |
 | `src/services/auth.service.test.ts` | 5. Contraseña incorrecta da un error genérico · 6. El código correcto abre sesión como solicitante |
+
+Cada prueba cubre algo que ya usa una pantalla de la app.
 
 GitHub Actions las corre en cada push y PR (job "App" del CI).
 
