@@ -70,11 +70,12 @@ nunca desde el panel web.
 
 Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren con `npm test` dentro de `app/`.
 
-| Archivo | Qué prueba |
+| Archivo | Pruebas |
 |---|---|
-| `src/domain/reglas.test.ts` | Reglas de negocio en pantalla: 2 horas, 15 días, 24 horas para cancelar, enrutamiento RN05, correo y código |
-| `src/services/auth.service.test.ts` | Ingreso con contraseña y con código, con Supabase simulado (no necesita internet) |
-| `src/features/acceso/ingresar/useIngresar.test.ts` | Lógica de la pantalla de ingreso: validaciones, navegación al panel y errores |
+| `src/domain/reglas.test.ts` | 1. Rechaza más de 2 horas · 2. Rechaza más de 15 días de anticipación · 3. No cancela con menos de 24 horas · 4. Correo externo va a Coordinación |
+| `src/services/auth.service.test.ts` | 5. Contraseña incorrecta da un error genérico · 6. El código correcto abre sesión como solicitante |
+
+GitHub Actions las corre en cada push y PR (job "App" del CI).
 
 ## Acceso de usuarios
 
