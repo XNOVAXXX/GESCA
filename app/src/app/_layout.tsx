@@ -15,6 +15,9 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ title: 'GESCA' }} />
         <Stack.Screen name="reservas/solicitar" options={{ title: 'Nueva reserva' }} />
+        <Stack.Screen name="acceso/ingresar" options={{ title: 'Ingresar' }} />
+        <Stack.Screen name="acceso/verificar" options={{ title: 'Verificar correo' }} />
+        <Stack.Screen name="panel" options={{ title: 'Mi panel' }} />
       </Stack>
     </>
   );

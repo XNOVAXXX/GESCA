@@ -20,6 +20,18 @@ jobs:
         run: supabase test db
       - name: Prueba de concurrencia (RNF04)
         run: ./supabase/tests/concurrencia.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Prueba de acceso (contraseña y código al correo)
+        run: |
+          (cd app && npm ci)
+          eval "$(supabase status -o env)"
+          cd app
+          SUPABASE_URL="$API_URL" SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
+            node ../supabase/tests/acceso.test.mjs
 
   app:
     name: App (tipos + reglas de separación)

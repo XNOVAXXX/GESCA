@@ -234,6 +234,16 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
+# INSOFT-24: el solicitante recibe un código de 6 dígitos (no un enlace). En la nube estas
+# plantillas se configuran igual en Authentication → Emails ("Confirm signup" y "Magic Link").
+[auth.email.template.confirmation]
+subject = "Tu código de acceso a GESCA"
+content_path = "./supabase/templates/codigo-acceso.html"
+
+[auth.email.template.magic_link]
+subject = "Tu código de acceso a GESCA"
+content_path = "./supabase/templates/codigo-acceso.html"
+
 # Use a production-ready SMTP server
 # [auth.email.smtp]
 # enabled = true

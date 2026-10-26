@@ -65,6 +65,28 @@ npm run lint && npm run typecheck
 Todo cambio a la base de datos se hace con una migración nueva (`supabase migration new <nombre>`),
 nunca desde el panel web.
 
+## Acceso de usuarios
+
+| Quién | Cómo entra | Pantalla |
+|---|---|---|
+| Administrador de Espacios y Coordinador | Correo y contraseña | `/acceso/ingresar` |
+| Solicitante (estudiante, docente o externo) | Código de 6 dígitos al correo, sin contraseña | `/acceso/verificar` (también se abre al radicar sin sesión) |
+
+Todo usuario nuevo queda como `solicitante`. Para el proyecto en la nube:
+
+1. **Exponer los esquemas**: Project Settings → Data API → Exposed schemas: `usuarios`, `espacios`, `reservas`.
+2. **Código en vez de enlace**: Authentication → Emails → plantillas *Confirm signup* y *Magic Link*: pegar
+   `supabase/templates/codigo-acceso.html` (usa `{{ .Token }}`).
+3. **Crear un administrador o coordinador**: Authentication → Users → Add user (con contraseña y
+   *Auto Confirm User*), y luego en SQL Editor:
+   `update usuarios.perfiles set rol = 'admin' where correo = 'correo@pascualbravo.edu.co';`
+   (o `'coordinador'`).
+4. **Correos a cualquier persona**: el servidor de correo incluido en Supabase solo envía a los miembros
+   del equipo del proyecto y unos pocos por hora. Para la demo con otros correos hay que configurar SMTP
+   propio en Authentication → Emails → SMTP Settings.
+
+La prueba `supabase/tests/acceso.test.mjs` revisa ambos ingresos contra el Supabase local y corre en el CI.
+
 ## Ramas
 
 `main` es lo que se demuestra, `develop` es la integración y `feature/HUxx-descripcion` es el trabajo

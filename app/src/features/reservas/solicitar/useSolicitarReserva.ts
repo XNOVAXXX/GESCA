@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { validarSolicitud } from '@/domain/reglas';
 import { radicarSolicitud } from '@/services/reservas.service';
+import { useSesion } from '@/features/acceso/useSesion';
 
 // Convierte "AAAA-MM-DD" + "HH:MM" en fecha local; null si el formato no es válido.
 function aFecha(fecha: string, hora: string): Date | null {
@@ -12,6 +13,7 @@ function aFecha(fecha: string, hora: string): Date | null {
 
 export function useSolicitarReserva() {
   const { espacioId = '', nombre = '' } = useLocalSearchParams<{ espacioId: string; nombre: string }>();
+  const { perfil } = useSesion();
 
   const [fecha, setFecha] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
@@ -34,6 +36,13 @@ export function useSolicitarReserva() {
     const encontrados = validarSolicitud(solicitud);
     setErrores(encontrados);
     if (encontrados.length > 0) return; // HU01 escenario 2: el formulario sigue en edición
+
+    // Solo un correo verificado puede radicar (RNF01). Después de verificar vuelve a este formulario.
+    if (!perfil) {
+      const volver = `/reservas/solicitar?espacioId=${encodeURIComponent(espacioId)}&nombre=${encodeURIComponent(nombre)}`;
+      router.push({ pathname: '/acceso/verificar', params: { volver } });
+      return;
+    }
 
     setEnviando(true);
     try {
@@ -64,6 +73,7 @@ export function useSolicitarReserva() {
     enviando,
     confirmacion,
     enviar,
+    correoVerificado: perfil?.correo ?? null,
   };
 }
 

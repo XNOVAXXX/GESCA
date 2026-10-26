@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import type { Espacio } from '@/domain/tipos';
 import { listarEspacios } from '@/services/espacios.service';
+import { useSesion } from '@/features/acceso/useSesion';
 
 export function useDisponibilidad() {
   const [espacios, setEspacios] = useState<Espacio[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const { perfil } = useSesion();
 
   useEffect(() => {
     let vigente = true;
@@ -38,7 +40,17 @@ export function useDisponibilidad() {
     router.push({ pathname: '/reservas/solicitar', params: { espacioId: espacio.id, nombre: espacio.nombre } });
   };
 
-  return { espacios, cargando, error, recargar, solicitar };
+  const irACuenta = () => router.push(perfil ? '/panel' : '/acceso/ingresar');
+
+  return {
+    espacios,
+    cargando,
+    error,
+    recargar,
+    solicitar,
+    textoCuenta: perfil ? `Hola, ${perfil.nombre.split(' ')[0]}` : 'Ingreso administrativo',
+    irACuenta,
+  };
 }
 
 export type DisponibilidadProps = ReturnType<typeof useDisponibilidad>;
