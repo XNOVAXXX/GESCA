@@ -14,6 +14,12 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: spacing.md,
   },
+  cuenta: {
+    ...typography.pequeno,
+    color: colors.primario,
+    textAlign: 'right',
+    marginBottom: spacing.sm,
+  },
   titulo: {
     ...typography.titulo,
     color: colors.primarioOscuro,

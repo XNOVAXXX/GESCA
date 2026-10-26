@@ -11,7 +11,7 @@ const NOMBRE_TIPO = {
   espacio_compartido: 'Espacio compartido',
 } as const;
 
-export function DisponibilidadView({ espacios, cargando, error, recargar, solicitar }: DisponibilidadProps) {
+export function DisponibilidadView({ espacios, cargando, error, recargar, solicitar, textoCuenta, irACuenta }: DisponibilidadProps) {
   return (
     <View style={styles.contenedor}>
       <Image
@@ -20,6 +20,9 @@ export function DisponibilidadView({ espacios, cargando, error, recargar, solici
         resizeMode="contain"
         accessibilityLabel="Institución Universitaria Pascual Bravo"
       />
+      <Pressable onPress={irACuenta} accessibilityRole="link">
+        <Text style={styles.cuenta}>{textoCuenta}</Text>
+      </Pressable>
       <Text style={styles.titulo}>Espacios disponibles</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {cargando ? (

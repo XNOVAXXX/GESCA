@@ -60,10 +60,47 @@ cp .env.example .env       # pegar la URL y la llave anon que imprime `supabase 
 npm install
 npm run web                # o: npm run android / npm run ios
 npm run lint && npm run typecheck
+npm test                   # pruebas unitarias (Jest)
 ```
 
 Todo cambio a la base de datos se hace con una migración nueva (`supabase migration new <nombre>`),
 nunca desde el panel web.
+
+## Pruebas unitarias
+
+Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren con `npm test` dentro de `app/`.
+
+| Archivo | Pruebas |
+|---|---|
+| `src/domain/reglas.test.ts` | 1. Rechaza más de 2 horas · 2. Rechaza más de 15 días de anticipación · 4. Correo externo va a Coordinación |
+| `src/services/reservas.service.test.ts` | 3. Un cruce de horario muestra un mensaje claro |
+| `src/services/auth.service.test.ts` | 5. Contraseña incorrecta da un error genérico · 6. El código correcto abre sesión como solicitante |
+
+Cada prueba cubre algo que ya usa una pantalla de la app.
+
+GitHub Actions las corre en cada push y PR (job "App" del CI).
+
+## Acceso de usuarios
+
+| Quién | Cómo entra | Pantalla |
+|---|---|---|
+| Administrador de Espacios y Coordinador | Correo y contraseña | `/acceso/ingresar` |
+| Solicitante (estudiante, docente o externo) | Código de 6 dígitos al correo, sin contraseña | `/acceso/verificar` (también se abre al radicar sin sesión) |
+
+Todo usuario nuevo queda como `solicitante`. Para el proyecto en la nube:
+
+1. **Exponer los esquemas**: Project Settings → Data API → Exposed schemas: `usuarios`, `espacios`, `reservas`.
+2. **Código en vez de enlace**: Authentication → Emails → plantillas *Confirm signup* y *Magic Link*: pegar
+   `supabase/templates/codigo-acceso.html` (usa `{{ .Token }}`).
+3. **Crear un administrador o coordinador**: Authentication → Users → Add user (con contraseña y
+   *Auto Confirm User*), y luego en SQL Editor:
+   `update usuarios.perfiles set rol = 'admin' where correo = 'correo@pascualbravo.edu.co';`
+   (o `'coordinador'`).
+4. **Correos a cualquier persona**: el servidor de correo incluido en Supabase solo envía a los miembros
+   del equipo del proyecto y unos pocos por hora. Para la demo con otros correos hay que configurar SMTP
+   propio en Authentication → Emails → SMTP Settings.
+
+La prueba `supabase/tests/acceso.test.mjs` revisa ambos ingresos contra el Supabase local y corre en el CI.
 
 ## Ramas
 
