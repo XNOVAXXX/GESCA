@@ -114,12 +114,14 @@ Auth y las Edge Functions en sus propios contenedores Docker, y en la nube corre
 
 Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren con `npm test` dentro de `app/`.
 
-| Archivo | Pruebas |
-|---|---|
-| `src/microservicios/reservas/reservas.reglas.test.ts` | 1. Rechaza más de 2 horas · 2. Rechaza más de 15 días de anticipación |
-| `src/microservicios/reservas/reservas.api.test.ts` | 3. Un cruce de horario muestra un mensaje claro |
-| `src/microservicios/usuarios/usuarios.reglas.test.ts` | 4. Correo externo va a Coordinación |
-| `src/microservicios/usuarios/usuarios.api.test.ts` | 5. Contraseña incorrecta da un error genérico · 6. El código correcto abre sesión como solicitante |
+Son 6 pruebas, 2 por integrante. Cada uno sube las suyas en su propio commit.
+
+| Integrante | Archivo | Pruebas |
+|---|---|---|
+| Julián Buitrago | `src/microservicios/usuarios/usuarios.api.test.ts` | 1. Contraseña incorrecta da un error genérico · 2. El código correcto abre sesión como solicitante |
+| John García | `src/microservicios/reservas/reservas.reglas.test.ts` | 3. Rechaza más de 2 horas · 4. Rechaza más de 15 días de anticipación |
+| Juan Ocampo | `src/microservicios/reservas/reservas.api.test.ts` | 5. Un cruce de horario muestra un mensaje claro |
+| Juan Ocampo | `src/microservicios/usuarios/usuarios.reglas.test.ts` | 6. Correo externo va a Coordinación |
 
 Cada prueba cubre algo que ya usa una pantalla de la app.
 
