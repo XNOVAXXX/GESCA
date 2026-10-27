@@ -1,0 +1,13 @@
+# GESCA con Docker.
+#
+#   docker compose up --build      → app web en http://localhost:8080
+#
+# El backend (Postgres, Auth y las Edge Functions de cada microservicio) es Supabase.
+# Para trabajar en local, `npx supabase start` lo levanta también en contenedores Docker.
+services:
+  web:
+    build: ./app
+    image: gesca-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped

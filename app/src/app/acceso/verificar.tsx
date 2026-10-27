@@ -1,5 +1,5 @@
-import { VerificarCorreoView } from '@/features/acceso/verificar-correo/VerificarCorreo.view';
-import { useVerificarCorreo } from '@/features/acceso/verificar-correo/useVerificarCorreo';
+import { VerificarCorreoView } from '@/microservicios/usuarios/pantallas/verificar-correo/VerificarCorreo.view';
+import { useVerificarCorreo } from '@/microservicios/usuarios/pantallas/verificar-correo/useVerificarCorreo';
 
 export default function VerificarCorreoRoute() {
   return <VerificarCorreoView {...useVerificarCorreo()} />;
