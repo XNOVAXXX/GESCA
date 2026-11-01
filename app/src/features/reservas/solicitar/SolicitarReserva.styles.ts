@@ -16,6 +16,12 @@ export const styles = StyleSheet.create({
     color: colors.textoSuave,
     marginBottom: spacing.lg,
   },
+  aviso: {
+    ...typography.pequeno,
+    color: colors.textoSuave,
+    marginTop: -spacing.md,
+    marginBottom: spacing.lg,
+  },
   etiqueta: {
     ...typography.pequeno,
     color: colors.texto,
