@@ -9,6 +9,7 @@ export function VerificarCorreoView(p: VerificarCorreoProps) {
     <ScrollView contentContainerStyle={styles.contenedor} keyboardShouldPersistTaps="handled">
       <Logo />
       <Text style={styles.titulo}>Verifica tu correo</Text>
+      {p.avisoSesion && <Text style={styles.avisoSesion}>{p.avisoSesion}</Text>}
 
       {p.paso === 'correo' ? (
         <>
