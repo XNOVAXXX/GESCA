@@ -12,6 +12,9 @@ El acta inició el 13/09, así que **hoy (11/10) empieza la semana 5**. Quedan 1
 
 ## 1. Estructura del repositorio (un solo repo en GitHub)
 
+La estructura actual del repositorio está en [arquitectura.md](arquitectura.md) y en el README.
+La idea original era esta:
+
 ```
 gesca/
 ├── app/                        # Expo (React Native) → web + Android + iOS
