@@ -31,6 +31,11 @@ export const styles = StyleSheet.create({
     color: colors.textoSuave,
     marginBottom: spacing.md,
   },
+  avisoSesion: {
+    ...typography.pequeno,
+    color: colors.advertencia,
+    marginBottom: spacing.md,
+  },
   botonSecundario: {
     backgroundColor: colors.superficie,
     borderColor: colors.primario,

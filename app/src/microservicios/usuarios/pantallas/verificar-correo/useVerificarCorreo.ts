@@ -3,12 +3,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { mensajeDe } from '@/compartido/errores';
 import { esCorreoInstitucional, validarCodigo, validarCorreo } from '@/microservicios/usuarios/usuarios.reglas';
 import { enviarCodigo, verificarCodigo } from '@/microservicios/usuarios/usuarios.api';
+import { AVISO_INACTIVIDAD } from '@/microservicios/usuarios/usuarios.tipos';
 
 type Paso = 'correo' | 'codigo';
 
 // INSOFT-24: el solicitante verifica su correo con un código de 6 dígitos, sin contraseña.
 export function useVerificarCorreo() {
-  const { volver } = useLocalSearchParams<{ volver?: string }>();
+  const { volver, motivo } = useLocalSearchParams<{ volver?: string; motivo?: string }>();
 
   const [paso, setPaso] = useState<Paso>('correo');
   const [nombre, setNombre] = useState('');
@@ -73,6 +74,7 @@ export function useVerificarCorreo() {
   const irAIngresoAdministrativo = () => router.replace('/acceso/ingresar');
 
   return {
+    avisoSesion: motivo === 'inactividad' ? AVISO_INACTIVIDAD : null,
     paso,
     nombre,
     setNombre,

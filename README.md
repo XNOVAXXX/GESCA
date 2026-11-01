@@ -67,6 +67,7 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 | RN05: laboratorios, espacios compartidos y correos externos van al Coordinador | Trigger `al_radicar` (columna `bandeja`) |
 | RN06: máx. 2 h, máx. 15 días, cancelar ≥ 24 h | `check duracion_maxima` y triggers |
 | RF04: cada bandeja la decide su rol | Trigger `al_cambiar_estado` y RLS |
+| Solo un admin asigna roles y siempre queda uno | RLS de `usuarios.perfiles` y trigger `al_cambiar_rol` |
 | Auditoría | Tabla `reservas.historial` |
 
 ## Desarrollo local
@@ -134,15 +135,22 @@ GitHub Actions las corre en cada push y PR (job "App" del CI). El job "Docker" c
 | Administrador de Espacios y Coordinador | Correo y contraseña | `/acceso/ingresar` |
 | Solicitante (estudiante, docente o externo) | Código de 6 dígitos al correo, sin contraseña | `/acceso/verificar` (también se abre al radicar sin sesión) |
 
-Todo usuario nuevo queda como `solicitante`. Para el proyecto en la nube:
+Todo usuario nuevo queda como `solicitante`. Después, el administrador asigna los roles desde
+**Mi panel → Usuarios y roles** (`/admin/usuarios`). La base de datos solo deja cambiar roles a un
+administrador y no permite quitar el rol al último administrador.
+
+Cada rol ve solo sus opciones en el panel, y las pantallas protegidas devuelven al panel a quien no
+tenga el rol. La sesión se cierra sola tras 15 minutos sin actividad (RNF02).
+
+Para el proyecto en la nube:
 
 1. **Exponer los esquemas**: Project Settings → Data API → Exposed schemas: `usuarios`, `espacios`, `reservas`.
 2. **Código en vez de enlace**: Authentication → Emails → plantillas *Confirm signup* y *Magic Link*: pegar
    `supabase/templates/codigo-acceso.html` (usa `{{ .Token }}`).
-3. **Crear un administrador o coordinador**: Authentication → Users → Add user (con contraseña y
+3. **Crear el primer administrador**: Authentication → Users → Add user (con contraseña y
    *Auto Confirm User*), y luego en SQL Editor:
    `update usuarios.perfiles set rol = 'admin' where correo = 'correo@pascualbravo.edu.co';`
-   (o `'coordinador'`).
+   Los siguientes roles se asignan desde la app.
 4. **Correos a cualquier persona**: el servidor de correo incluido en Supabase solo envía a los miembros
    del equipo del proyecto y unos pocos por hora. Para la demo con otros correos hay que configurar SMTP
    propio en Authentication → Emails → SMTP Settings.
