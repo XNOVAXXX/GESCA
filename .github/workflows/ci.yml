@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  base-de-datos:
+    name: Base de datos (migraciones + pruebas de reglas)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Levantar Supabase local y aplicar migraciones + seed
+        run: supabase start -x studio,imgproxy,inbucket,realtime,storage-api,edge-runtime,logflare,vector,supavisor
+      - name: Pruebas de reglas de negocio (pgTAP)
+        run: supabase test db
+      - name: Prueba de concurrencia (RNF04)
+        run: ./supabase/tests/concurrencia.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
+  app:
+    name: App (tipos + reglas de separación)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
