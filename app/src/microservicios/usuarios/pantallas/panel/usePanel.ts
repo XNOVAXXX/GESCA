@@ -21,9 +21,11 @@ export function usePanel() {
     correo: perfil?.correo ?? '',
     rol: perfil ? NOMBRE_ROL[perfil.rol] : '',
     puedeGestionarUsuarios: perfil?.rol === 'admin',
+    puedeGestionarEspacios: perfil?.rol === 'admin',
     salir,
     verEspacios: () => router.push('/'),
     gestionarUsuarios: () => router.push('/admin/usuarios'),
+    gestionarEspacios: () => router.push('/admin/espacios'),
   };
 }
 

@@ -68,6 +68,8 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 | RN06: máx. 2 h, máx. 15 días, cancelar ≥ 24 h | `check duracion_maxima` y triggers |
 | RF04: cada bandeja la decide su rol | Trigger `al_cambiar_estado` y RLS |
 | Solo un admin asigna roles y siempre queda uno | RLS de `usuarios.perfiles` y trigger `al_cambiar_rol` |
+| Solo un admin gestiona espacios; nombre único sin importar mayúsculas | RLS de `espacios.espacios` e índice `espacios_nombre_unico_ci` |
+| HU02: mantenimiento exige motivo; al reactivar se borra | `check mantenimiento_con_motivo` y trigger `al_cambiar_estado` |
 | Auditoría | Tabla `reservas.historial` |
 
 ## Desarrollo local
@@ -126,6 +128,8 @@ Son 6 pruebas, 2 por integrante. Cada uno sube las suyas en su propio commit.
 
 Cada prueba cubre algo que ya usa una pantalla de la app.
 
+Aparte de esas 6, `src/microservicios/espacios/` trae pruebas de la gestión de espacios (INSOFT-28 y 29).
+
 GitHub Actions las corre en cada push y PR (job "App" del CI). El job "Docker" comprueba que la imagen se construye.
 
 ## Acceso de usuarios
@@ -141,6 +145,10 @@ administrador y no permite quitar el rol al último administrador.
 
 Cada rol ve solo sus opciones en el panel, y las pantallas protegidas devuelven al panel a quien no
 tenga el rol. La sesión se cierra sola tras 15 minutos sin actividad (RNF02).
+
+El administrador registra, edita y pone en mantenimiento los espacios desde **Mi panel → Gestionar espacios**
+(`/admin/espacios`). Poner un espacio en mantenimiento pide un motivo, y mientras siga así no recibe
+solicitudes ni aprobaciones (RN03).
 
 Para el proyecto en la nube:
 
