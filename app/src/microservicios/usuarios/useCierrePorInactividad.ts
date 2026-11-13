@@ -37,7 +37,7 @@ export function useCierrePorInactividad() {
     const intervalo = setInterval(revisar, REVISAR_CADA_MS);
     // Al volver a la app desde segundo plano se revisa de inmediato.
     const alCambiarEstado = AppState.addEventListener('change', (estado) => {
-      if (estado === 'active') revisar();
+      if (estado === 'active') void revisar();
     });
     const documento = typeof document === 'undefined' ? null : document;
     EVENTOS_WEB.forEach((e) => documento?.addEventListener(e, registrarActividad, { passive: true }));

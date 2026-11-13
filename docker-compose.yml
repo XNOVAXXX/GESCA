@@ -9,7 +9,7 @@ services:
     build: ./app
     image: gesca-web
     ports:
-      - "8080:80"
+      - "8080:8080"
     restart: unless-stopped
 
   # SonarQube local para revisar la calidad del código (opcional, ver docs/calidad-sonarqube.md):
