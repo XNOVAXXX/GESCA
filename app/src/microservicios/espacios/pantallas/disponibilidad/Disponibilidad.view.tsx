@@ -1,16 +1,9 @@
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { Logo } from '@/compartido/componentes/Logo.view';
 import { colors } from '@/compartido/tema';
+import { NOMBRE_TIPO } from '@/microservicios/espacios/espacios.tipos';
 import type { DisponibilidadProps } from './useDisponibilidad';
 import { styles } from './Disponibilidad.styles';
-
-const NOMBRE_TIPO = {
-  auditorio: 'Auditorio',
-  sala_computo: 'Sala de cómputo',
-  cancha: 'Cancha',
-  laboratorio: 'Laboratorio',
-  espacio_compartido: 'Espacio compartido',
-} as const;
 
 export function DisponibilidadView({ espacios, cargando, error, recargar, solicitar, textoCuenta, irACuenta }: DisponibilidadProps) {
   return (

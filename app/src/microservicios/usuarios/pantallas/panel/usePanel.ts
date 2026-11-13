@@ -1,36 +1,31 @@
-import { useEffect } from 'react';
 import { router } from 'expo-router';
 import { cerrarSesion } from '@/microservicios/usuarios/usuarios.api';
-import { useSesion } from '@/microservicios/usuarios/useSesion';
+import { NOMBRE_ROL } from '@/microservicios/usuarios/usuarios.tipos';
+import { useRequiereRol } from '@/microservicios/usuarios/useRequiereRol';
 
-const NOMBRE_ROL = {
-  admin: 'Administrador de Espacios',
-  coordinador: 'Coordinación / Laboratorio',
-  solicitante: 'Solicitante',
-} as const;
+const TODOS = ['admin', 'coordinador', 'solicitante'] as const;
 
-// Panel inicial después de ingresar. Las bandejas de cada rol llegan con la épica de aprobaciones.
+// INSOFT-26: panel después de ingresar. Cada rol ve solo las opciones que le corresponden.
+// Las bandejas de aprobación llegan con la épica de aprobaciones.
 export function usePanel() {
-  const { perfil, cargando } = useSesion();
-
-  useEffect(() => {
-    if (!cargando && !perfil) router.replace('/acceso/ingresar');
-  }, [cargando, perfil]);
+  const { perfil, cargando } = useRequiereRol(TODOS);
 
   const salir = async () => {
     await cerrarSesion();
     router.replace('/');
   };
 
-  const verEspacios = () => router.push('/');
-
   return {
     cargando,
     nombre: perfil?.nombre ?? '',
     correo: perfil?.correo ?? '',
     rol: perfil ? NOMBRE_ROL[perfil.rol] : '',
+    puedeGestionarUsuarios: perfil?.rol === 'admin',
+    puedeGestionarEspacios: perfil?.rol === 'admin',
     salir,
-    verEspacios,
+    verEspacios: () => router.push('/'),
+    gestionarUsuarios: () => router.push('/admin/usuarios'),
+    gestionarEspacios: () => router.push('/admin/espacios'),
   };
 }
 

@@ -2,7 +2,7 @@
 // Administrador y Coordinador entran con contraseña; el solicitante, con un código al correo.
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/compartido/supabase';
-import type { Perfil } from './usuarios.tipos';
+import type { Perfil, Rol } from './usuarios.tipos';
 
 const CREDENCIALES_INVALIDAS = 'Correo o contraseña incorrectos.';
 
@@ -69,4 +69,27 @@ export async function obtenerPerfil(): Promise<Perfil | null> {
 export function escucharSesion(alCambiar: (haySesion: boolean) => void): () => void {
   const { data } = supabase.auth.onAuthStateChange((_evento, sesion: Session | null) => alCambiar(!!sesion));
   return () => data.subscription.unsubscribe();
+}
+
+// INSOFT-27: el administrador ve todos los perfiles (la RLS solo se los muestra a admin y coordinador).
+export async function listarPerfiles(): Promise<Perfil[]> {
+  const { data, error } = await supabase
+    .schema('usuarios')
+    .from('perfiles')
+    .select('id, nombre, correo, rol')
+    .order('nombre');
+  if (error) throw new Error('No se pudieron cargar los usuarios.');
+  return (data ?? []) as Perfil[];
+}
+
+// La base de datos decide si se puede: solo un admin cambia roles y siempre debe quedar un admin.
+export async function cambiarRol(id: string, rol: Rol): Promise<void> {
+  const { data, error } = await supabase
+    .schema('usuarios')
+    .from('perfiles')
+    .update({ rol })
+    .eq('id', id)
+    .select('id');
+  if (error?.code === 'P0001') throw new Error(error.message);
+  if (error || !data?.length) throw new Error('No se pudo cambiar el rol.');
 }

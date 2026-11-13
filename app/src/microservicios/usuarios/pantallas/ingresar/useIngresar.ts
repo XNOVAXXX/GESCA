@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { mensajeDe } from '@/compartido/errores';
 import { validarCorreo } from '@/microservicios/usuarios/usuarios.reglas';
 import { iniciarSesionConContrasena } from '@/microservicios/usuarios/usuarios.api';
+import { AVISO_INACTIVIDAD } from '@/microservicios/usuarios/usuarios.tipos';
 
 // INSOFT-23: ingreso con contraseña para Administrador y Coordinador.
 export function useIngresar() {
+  const { motivo } = useLocalSearchParams<{ motivo?: string }>();
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,9 @@ export function useIngresar() {
 
   const irAVerificarCorreo = () => router.replace('/acceso/verificar');
 
-  return { correo, setCorreo, contrasena, setContrasena, error, enviando, ingresar, irAVerificarCorreo };
+  const avisoSesion = motivo === 'inactividad' ? AVISO_INACTIVIDAD : null;
+
+  return { avisoSesion, correo, setCorreo, contrasena, setContrasena, error, enviando, ingresar, irAVerificarCorreo };
 }
 
 export type IngresarProps = ReturnType<typeof useIngresar>;

@@ -10,6 +10,7 @@ export function IngresarView(p: IngresarProps) {
       <Logo />
       <Text style={styles.titulo}>Ingreso administrativo</Text>
       <Text style={styles.subtitulo}>Para Administración de Espacios y Coordinación.</Text>
+      {p.avisoSesion && <Text style={styles.avisoSesion}>{p.avisoSesion}</Text>}
 
       <Text style={styles.etiqueta}>Correo</Text>
       <TextInput

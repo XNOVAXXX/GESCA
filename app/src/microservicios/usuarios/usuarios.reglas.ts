@@ -17,3 +17,9 @@ export function validarCodigo(codigo: string): string | null {
 export function esCorreoInstitucional(correo: string): boolean {
   return correo.trim().toLowerCase().endsWith(DOMINIO_INSTITUCIONAL);
 }
+
+export const MINUTOS_INACTIVIDAD = 15; // RNF02
+
+export function sesionInactiva(ultimaActividad: number, ahora = Date.now()): boolean {
+  return ahora - ultimaActividad >= MINUTOS_INACTIVIDAD * 60 * 1000;
+}
