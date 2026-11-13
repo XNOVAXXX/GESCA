@@ -9,28 +9,53 @@ laboratorios y espacios compartidos) de la I.U. Pascual Bravo.
 | Backend | Supabase: Postgres, Auth, Edge Functions |
 | Arquitectura | Microservicios ligeros: un esquema de Postgres por dominio y una Edge Function por servicio |
 
-## Estructura
+## Estructura: un microservicio por dominio
+
+Cada dominio del negocio es un microservicio. Tiene su propio esquema en Postgres, sus reglas en la
+base de datos, su Edge Function cuando necesita lógica de servidor y su propio módulo en la app.
+
+| Microservicio | Base de datos | Edge Function | Módulo de la app |
+|---|---|---|---|
+| Usuarios | esquema `usuarios` + Supabase Auth | (usa Auth directo) | `app/src/microservicios/usuarios/` |
+| Espacios | esquema `espacios` | (lectura directa con RLS) | `app/src/microservicios/espacios/` |
+| Reservas | esquema `reservas` | `svc-reservas` | `app/src/microservicios/reservas/` |
 
 ```
-app/                          App Expo
-  src/app/                    Rutas: solo unen un hook con una vista
-  src/features/<dominio>/<pantalla>/
-    Pantalla.view.tsx         ESTRUCTURA (qué se muestra y dónde)
-    Pantalla.styles.ts        DISEÑO (colores, tamaños, márgenes)
-    usePantalla.ts            FUNCIONALIDAD (datos, validaciones, navegación)
-  src/services/               Único punto que habla con Supabase
-  src/theme/                  Paleta institucional y tipografía
-  src/domain/                 Tipos y reglas de negocio para validar en pantalla
+app/                              App Expo (web, Android, iOS)
+  src/app/                        Rutas: solo unen un hook con una vista
+  src/microservicios/
+    usuarios/                     Ingreso con contraseña, código al correo, sesión
+      usuarios.api.ts             DATOS: único archivo que habla con Supabase
+      usuarios.reglas.ts          Reglas que se validan en pantalla
+      usuarios.tipos.ts           Tipos del dominio
+      index.ts                    Lo que este microservicio ofrece a los demás
+      pantallas/<pantalla>/
+        Pantalla.view.tsx         ESTRUCTURA (qué se muestra y dónde)
+        Pantalla.styles.ts        DISEÑO (colores, tamaños, márgenes)
+        usePantalla.ts            FUNCIONALIDAD (datos, validaciones, navegación)
+    espacios/                     Catálogo y disponibilidad (misma forma)
+    reservas/                     Solicitudes de reserva (misma forma)
+  src/compartido/                 Lo que usan todos: cliente Supabase, tema, logo, errores
+  Dockerfile, nginx.conf          Imagen de la app web
 supabase/
-  migrations/                 Esquemas usuarios, espacios y reservas, con sus reglas
-  functions/svc-reservas/     Microservicio de reservas
-  tests/                      Pruebas de las reglas (pgTAP) y de concurrencia
-  seed.sql                    Espacios de ejemplo
-docs/                         Plan de desarrollo y análisis del stack
+  migrations/                     Un archivo por esquema: usuarios, espacios, reservas
+  functions/svc-reservas/         Edge Function del microservicio de reservas
+  tests/usuarios/                 Prueba de acceso contra Supabase local
+  tests/reservas/                 Reglas RN01 a RN06 (pgTAP) y concurrencia
+  templates/                      Correo con el código de acceso
+  seed.sql                        Espacios de ejemplo
+docs/                             Arquitectura, plan de desarrollo y análisis del stack
+docker-compose.yml                Levanta la app web en Docker
 ```
 
-La separación entre estructura, diseño y funcionalidad la vigila ESLint (`app/eslint.config.js`).
-Por ejemplo, una vista que importe un servicio o use estilos en línea no pasa el CI.
+ESLint (`app/eslint.config.js`) vigila dos reglas y el CI falla si se rompen:
+
+1. **Fronteras entre microservicios.** Un microservicio solo usa a otro a través de su `index.ts`.
+   Por ejemplo, `espacios` puede importar `@/microservicios/usuarios`, pero no `@/microservicios/usuarios/usuarios.api`.
+2. **Estructura, diseño y funcionalidad separados.** Una vista que llame a un `*.api.ts` o use estilos
+   en línea, o un hook que importe colores, no pasa.
+
+Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Reglas de negocio en la base de datos
 
@@ -42,6 +67,9 @@ Por ejemplo, una vista que importe un servicio o use estilos en línea no pasa e
 | RN05: laboratorios, espacios compartidos y correos externos van al Coordinador | Trigger `al_radicar` (columna `bandeja`) |
 | RN06: máx. 2 h, máx. 15 días, cancelar ≥ 24 h | `check duracion_maxima` y triggers |
 | RF04: cada bandeja la decide su rol | Trigger `al_cambiar_estado` y RLS |
+| Solo un admin asigna roles y siempre queda uno | RLS de `usuarios.perfiles` y trigger `al_cambiar_rol` |
+| Solo un admin gestiona espacios; nombre único sin importar mayúsculas | RLS de `espacios.espacios` e índice `espacios_nombre_unico_ci` |
+| HU02: mantenimiento exige motivo; al reactivar se borra | `check mantenimiento_con_motivo` y trigger `al_cambiar_estado` |
 | Auditoría | Tabla `reservas.historial` |
 
 ## Desarrollo local
@@ -49,21 +77,99 @@ Por ejemplo, una vista que importe un servicio o use estilos en línea no pasa e
 Requisitos: Node 22, Docker y el [CLI de Supabase](https://supabase.com/docs/guides/cli).
 
 ```bash
-# Base de datos y servicios
-supabase start             # levanta Postgres, Auth y Edge Functions, aplica migraciones y seed
-supabase test db           # pruebas de reglas de negocio
-./supabase/tests/concurrencia.sh
+# Backend: Postgres, Auth y Edge Functions en contenedores Docker
+npx supabase start         # aplica migraciones y seed
+npx supabase test db       # pruebas de reglas de negocio
+./supabase/tests/reservas/concurrencia.sh
 
 # App
 cd app
-cp .env.example .env       # pegar la URL y la llave anon que imprime `supabase start`
+cp .env.example .env       # pegar la URL y la llave anon (de `supabase start` o del panel de Supabase)
 npm install
 npm run web                # o: npm run android / npm run ios
 npm run lint && npm run typecheck
+npm test                   # pruebas unitarias (Jest)
 ```
+
+En Windows con PowerShell, usar `npm.cmd` en lugar de `npm` (por ejemplo `npm.cmd run web`).
 
 Todo cambio a la base de datos se hace con una migración nueva (`supabase migration new <nombre>`),
 nunca desde el panel web.
+
+## Docker
+
+La app web corre en un contenedor con Nginx. Solo hace falta Docker Desktop.
+
+```bash
+cp app/.env.example app/.env     # llenar URL y llave anon de Supabase
+docker compose up --build        # abre http://localhost:8080
+docker compose down              # detener
+```
+
+La imagen se construye en dos etapas: Node genera la versión web con Expo y Nginx la sirve
+(la imagen final pesa unos 75 MB y no lleva Node). Los valores de `app/.env` quedan incrustados al
+construir, así que después de cambiarlos hay que volver a correr `docker compose up --build`.
+
+El backend no va en este `docker-compose.yml`: en local, `npx supabase start` ya levanta Postgres,
+Auth y las Edge Functions en sus propios contenedores Docker, y en la nube corre en Supabase.
+
+## Pruebas unitarias
+
+Se escriben con Jest junto al archivo que prueban (`archivo.test.ts`) y corren con `npm test` dentro de `app/`.
+
+Son 6 pruebas, 2 por integrante. Cada uno sube las suyas en su propio commit.
+
+| Integrante | Archivo | Pruebas |
+|---|---|---|
+| Julián Buitrago | `src/microservicios/usuarios/usuarios.api.test.ts` | 1. Contraseña incorrecta da un error genérico · 2. El código correcto abre sesión como solicitante |
+| John García | `src/microservicios/reservas/reservas.reglas.test.ts` | 3. Rechaza más de 2 horas · 4. Rechaza más de 15 días de anticipación |
+| Juan Ocampo | `src/microservicios/reservas/reservas.api.test.ts` | 5. Un cruce de horario muestra un mensaje claro |
+| Juan Ocampo | `src/microservicios/usuarios/usuarios.reglas.test.ts` | 6. Correo externo va a Coordinación |
+
+Cada prueba cubre algo que ya usa una pantalla de la app.
+
+Aparte de esas 6, `src/microservicios/espacios/` trae pruebas de la gestión de espacios (INSOFT-28 y 29).
+
+GitHub Actions las corre en cada push y PR (job "App" del CI). El job "Docker" comprueba que la imagen se construye.
+
+## Calidad del código (SonarQube)
+
+El job "SonarQube" del CI analiza el código y la cobertura en SonarQube Cloud cuando el repo tiene el
+secreto `SONAR_TOKEN`. También se puede levantar SonarQube local con Docker. Los pasos están en
+[docs/calidad-sonarqube.md](docs/calidad-sonarqube.md).
+
+## Acceso de usuarios
+
+| Quién | Cómo entra | Pantalla |
+|---|---|---|
+| Administrador de Espacios y Coordinador | Correo y contraseña | `/acceso/ingresar` |
+| Solicitante (estudiante, docente o externo) | Código de 6 dígitos al correo, sin contraseña | `/acceso/verificar` (también se abre al radicar sin sesión) |
+
+Todo usuario nuevo queda como `solicitante`. Después, el administrador asigna los roles desde
+**Mi panel → Usuarios y roles** (`/admin/usuarios`). La base de datos solo deja cambiar roles a un
+administrador y no permite quitar el rol al último administrador.
+
+Cada rol ve solo sus opciones en el panel, y las pantallas protegidas devuelven al panel a quien no
+tenga el rol. La sesión se cierra sola tras 15 minutos sin actividad (RNF02).
+
+El administrador registra, edita y pone en mantenimiento los espacios desde **Mi panel → Gestionar espacios**
+(`/admin/espacios`). Poner un espacio en mantenimiento pide un motivo, y mientras siga así no recibe
+solicitudes ni aprobaciones (RN03).
+
+Para el proyecto en la nube:
+
+1. **Exponer los esquemas**: Project Settings → Data API → Exposed schemas: `usuarios`, `espacios`, `reservas`.
+2. **Código en vez de enlace**: Authentication → Emails → plantillas *Confirm signup* y *Magic Link*: pegar
+   `supabase/templates/codigo-acceso.html` (usa `{{ .Token }}`).
+3. **Crear el primer administrador**: Authentication → Users → Add user (con contraseña y
+   *Auto Confirm User*), y luego en SQL Editor:
+   `update usuarios.perfiles set rol = 'admin' where correo = 'correo@pascualbravo.edu.co';`
+   Los siguientes roles se asignan desde la app.
+4. **Correos a cualquier persona**: el servidor de correo incluido en Supabase solo envía a los miembros
+   del equipo del proyecto y unos pocos por hora. Para la demo con otros correos hay que configurar SMTP
+   propio en Authentication → Emails → SMTP Settings.
+
+La prueba `supabase/tests/usuarios/acceso.test.mjs` revisa ambos ingresos contra el Supabase local y corre en el CI.
 
 ## Ramas
 
