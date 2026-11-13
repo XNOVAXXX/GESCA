@@ -78,7 +78,7 @@ jobs:
           path: app/coverage
       - name: Análisis de SonarQube
         if: env.SONAR_TOKEN != ''
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
 
   docker:
     name: Imagen Docker de la app web
