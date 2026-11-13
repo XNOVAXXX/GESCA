@@ -8,11 +8,13 @@
 FROM node:22-alpine AS construccion
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# --ignore-scripts: no se ejecutan scripts de instalación de terceros (la app no los necesita).
+RUN npm ci --ignore-scripts
 COPY . .
-RUN npx expo export --platform web
+RUN npm run export:web
 
-FROM nginx:1.27-alpine AS servidor
+# Imagen de Nginx que corre sin usuario root.
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS servidor
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=construccion /app/dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080

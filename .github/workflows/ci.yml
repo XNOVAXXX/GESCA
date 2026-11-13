@@ -27,7 +27,7 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - name: Prueba de acceso (contraseña y código al correo)
         run: |
-          (cd app && npm ci)
+          (cd app && npm ci --ignore-scripts)
           eval "$(supabase status -o env)"
           cd app
           SUPABASE_URL="$API_URL" SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
@@ -46,7 +46,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test:coverage -- --ci

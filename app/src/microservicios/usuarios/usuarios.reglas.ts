@@ -3,8 +3,19 @@
 export const LONGITUD_CODIGO = 6; // RNF01: código de verificación enviado al correo
 export const DOMINIO_INSTITUCIONAL = '@pascualbravo.edu.co'; // RN05
 
+// Sin expresiones regulares con retroceso: un "@" único, sin espacios y un dominio con punto interno.
 export function validarCorreo(correo: string): string | null {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim()) ? null : 'Escribe un correo válido.';
+  const valor = correo.trim();
+  const arroba = valor.indexOf('@');
+  const dominio = valor.slice(arroba + 1);
+  const valido =
+    arroba > 0 &&
+    arroba === valor.lastIndexOf('@') &&
+    !/\s/.test(valor) &&
+    dominio.includes('.') &&
+    !dominio.startsWith('.') &&
+    !dominio.endsWith('.');
+  return valido ? null : 'Escribe un correo válido.';
 }
 
 export function validarCodigo(codigo: string): string | null {
