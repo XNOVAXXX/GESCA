@@ -19,7 +19,7 @@ jobs:
       - name: Pruebas de reglas de negocio (pgTAP)
         run: supabase test db
       - name: Prueba de concurrencia (RNF04)
-        run: ./supabase/tests/concurrencia.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+        run: ./supabase/tests/reservas/concurrencia.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -31,7 +31,7 @@ jobs:
           eval "$(supabase status -o env)"
           cd app
           SUPABASE_URL="$API_URL" SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
-            node ../supabase/tests/acceso.test.mjs
+            node ../supabase/tests/usuarios/acceso.test.mjs
 
   app:
     name: App (tipos, reglas de separación y pruebas unitarias)
@@ -49,4 +49,41 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm test -- --ci
+      - run: npm run test:coverage -- --ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: app/coverage/lcov.info
+
+  sonarqube:
+    name: SonarQube (calidad del código)
+    needs: app
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # Vacío = SonarQube Cloud. Para un servidor propio, crea la variable SONAR_HOST_URL en el repo.
+      SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+    steps:
+      - name: Avisar si falta el token
+        if: env.SONAR_TOKEN == ''
+        run: echo "::notice::SonarQube no corre porque falta el secreto SONAR_TOKEN (ver docs/calidad-sonarqube.md)."
+      - uses: actions/checkout@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          name: cobertura
+          path: app/coverage
+      - name: Análisis de SonarQube
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+
+  docker:
+    name: Imagen Docker de la app web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir la imagen
+        run: docker compose build
