@@ -132,6 +132,12 @@ Aparte de esas 6, `src/microservicios/espacios/` trae pruebas de la gestión de 
 
 GitHub Actions las corre en cada push y PR (job "App" del CI). El job "Docker" comprueba que la imagen se construye.
 
+## Calidad del código (SonarQube)
+
+El job "SonarQube" del CI analiza el código y la cobertura en SonarQube Cloud cuando el repo tiene el
+secreto `SONAR_TOKEN`. También se puede levantar SonarQube local con Docker. Los pasos están en
+[docs/calidad-sonarqube.md](docs/calidad-sonarqube.md).
+
 ## Acceso de usuarios
 
 | Quién | Cómo entra | Pantalla |
