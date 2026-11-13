@@ -11,7 +11,9 @@ const { createClient } = createRequire(`${process.cwd()}/`)('@supabase/supabase-
 const url = process.env.SUPABASE_URL;
 const anonKey = process.env.SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-assert.ok(url && anonKey && serviceKey, 'Faltan SUPABASE_URL, SUPABASE_ANON_KEY o SUPABASE_SERVICE_ROLE_KEY');
+if (!url || !anonKey || !serviceKey) {
+  throw new Error('Faltan SUPABASE_URL, SUPABASE_ANON_KEY o SUPABASE_SERVICE_ROLE_KEY');
+}
 
 const sinSesion = { auth: { persistSession: false, autoRefreshToken: false } };
 const admin = createClient(url, serviceKey, sinSesion);
