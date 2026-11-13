@@ -34,7 +34,7 @@ TOTAL=$("${PSQL[@]}" -c "select count(*) from reservas.reservas where espacio_id
                  delete from auth.users where id = '00000000-0000-0000-0000-00000000c0c0';"
 
 cat /tmp/gesca_conc_1.log /tmp/gesca_conc_2.log | grep -i "error" || true
-if [ "$TOTAL" = "1" ]; then
+if [[ "$TOTAL" = "1" ]]; then
   echo "OK: de 2 solicitudes simultáneas solo 1 quedó registrada."
 else
   echo "FALLO: quedaron $TOTAL reservas en la misma franja." && exit 1
