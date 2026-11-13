@@ -28,6 +28,11 @@ export function PanelView(p: PanelProps) {
           <Text style={styles.textoBoton}>Usuarios y roles</Text>
         </Pressable>
       )}
+      {p.puedeGestionarEspacios && (
+        <Pressable style={styles.boton} onPress={p.gestionarEspacios} accessibilityRole="button">
+          <Text style={styles.textoBoton}>Gestionar espacios</Text>
+        </Pressable>
+      )}
       <Pressable style={styles.boton} onPress={p.verEspacios} accessibilityRole="button">
         <Text style={styles.textoBoton}>Ver espacios</Text>
       </Pressable>

@@ -23,6 +23,7 @@ export default function RootLayout() {
         <Stack.Screen name="acceso/verificar" options={{ title: 'Verificar correo' }} />
         <Stack.Screen name="panel" options={{ title: 'Mi panel' }} />
         <Stack.Screen name="admin/usuarios" options={{ title: 'Usuarios y roles' }} />
+        <Stack.Screen name="admin/espacios" options={{ title: 'Gestionar espacios' }} />
       </Stack>
     </ZonaActividad>
   );
