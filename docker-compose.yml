@@ -1,0 +1,30 @@
+# GESCA con Docker.
+#
+#   docker compose up --build      → app web en http://localhost:8080
+#
+# El backend (Postgres, Auth y las Edge Functions de cada microservicio) es Supabase.
+# Para trabajar en local, `npx supabase start` lo levanta también en contenedores Docker.
+services:
+  web:
+    build: ./app
+    image: gesca-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # SonarQube local para revisar la calidad del código (opcional, ver docs/calidad-sonarqube.md):
+  #   docker compose --profile calidad up -d sonarqube   → http://localhost:9000 (admin / admin)
+  sonarqube:
+    image: sonarqube:community
+    profiles: ["calidad"]
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
