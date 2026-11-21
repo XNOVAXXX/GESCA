@@ -35,7 +35,7 @@ describe('Solicitar reserva (HU01)', () => {
     ).rejects.toThrow('El espacio ya está reservado en esa franja horaria.');
   });
 });
-describe('Mis reservas y bandejas (INSOFT-32, 33, 40, 41)', () => {
+describe('Mis reservas y bandejas (INSOFT-34, 35, 37, 38)', () => {
   it('convierte las reservas de la base de datos en fechas', async () => {
     simularBD({
       data: [

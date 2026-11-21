@@ -23,7 +23,7 @@ describe('Solicitar reserva (HU01)', () => {
     expect(errores).toContain('Solo se puede reservar con máximo 15 días de anticipación.');
   });
 });
-describe('Cancelar una reserva (INSOFT-33)', () => {
+describe('Cancelar una reserva (INSOFT-35)', () => {
   it('permite cancelar con 24 horas o más de anticipación (RN06)', () => {
     expect(puedeCancelar({ estado: 'aprobada', inicio: horas(24) }, AHORA)).toBe(true);
     expect(puedeCancelar({ estado: 'pendiente', inicio: horas(48) }, AHORA)).toBe(true);

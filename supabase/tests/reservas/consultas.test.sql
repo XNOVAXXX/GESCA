@@ -1,4 +1,4 @@
--- Pruebas de "Mis reservas" y de las bandejas de aprobación (INSOFT-32, 33, 40, 41).
+-- Pruebas de "Mis reservas" y de las bandejas de aprobación (INSOFT-34, 35, 37, 38).
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
@@ -47,7 +47,7 @@ select '20000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-00000000
        '00000000-0000-0000-0000-0000000000e2', tstzrange(inicio + interval '4 hours', inicio + interval '5 hours'), 'Evento'
 from t;
 
--- ------------------------------------------------------ Mis reservas (INSOFT-32)
+-- ------------------------------------------------------ Mis reservas (INSOFT-34)
 select is((select count(*)::int from reservas.mis_reservas()), 1, 'el externo solo ve su propia reserva');
 
 select pg_temp.como('00000000-0000-0000-0000-0000000000e1');
@@ -55,7 +55,7 @@ select is((select count(*)::int from reservas.mis_reservas()), 2, 'el estudiante
 select is((select espacio_nombre from reservas.mis_reservas() where id = '20000000-0000-0000-0000-000000000001'),
   'Auditorio prueba', 'cada reserva trae el nombre del espacio');
 
--- ------------------------------------------------------ Bandejas (INSOFT-40/41, RN05)
+-- ------------------------------------------------------ Bandejas (INSOFT-37/38, RN05)
 select is((select count(*)::int from reservas.bandeja_pendiente()), 0, 'un solicitante no tiene bandeja');
 
 select pg_temp.como('00000000-0000-0000-0000-0000000000a1');
@@ -86,7 +86,7 @@ select lives_ok($$
   where id = '20000000-0000-0000-0000-000000000002' $$,
   'el Coordinador rechaza con justificación');
 
--- ------------------------------------------------------ Cancelar (INSOFT-33)
+-- ------------------------------------------------------ Cancelar (INSOFT-35)
 select pg_temp.como('00000000-0000-0000-0000-0000000000e2');
 select lives_ok($$
   update reservas.reservas set estado = 'cancelada', motivo_decision = 'Se aplazó el evento'

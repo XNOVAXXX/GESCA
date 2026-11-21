@@ -7,7 +7,7 @@ import { puedeCancelar, validarJustificacion } from '@/microservicios/reservas/r
 import { NOMBRE_BANDEJA, NOMBRE_ESTADO_RESERVA, type Reserva } from '@/microservicios/reservas/reservas.tipos';
 import { useSesion } from '@/microservicios/usuarios';
 
-// INSOFT-32 (mis reservas y su estado) e INSOFT-33 (cancelar con justificación, RN04 y RN06).
+// INSOFT-34 (mis reservas y su estado) e INSOFT-35 (cancelar con justificación, RN04 y RN06).
 export function useMisReservas() {
   const { perfil, cargando: verificando } = useSesion();
   const [reservas, setReservas] = useState<Reserva[]>([]);

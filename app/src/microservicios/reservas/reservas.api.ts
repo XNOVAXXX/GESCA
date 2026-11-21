@@ -72,7 +72,7 @@ interface FilaPendiente {
   bandeja: Bandeja;
 }
 
-// INSOFT-32: reservas del usuario de la sesión (función reservas.mis_reservas).
+// INSOFT-34: reservas del usuario de la sesión (función reservas.mis_reservas).
 export async function misReservas(): Promise<Reserva[]> {
   const { data, error } = await supabase.schema('reservas').rpc('mis_reservas');
   if (error) throw errorDeReserva(error, 'No se pudieron cargar tus reservas.');
@@ -89,7 +89,7 @@ export async function misReservas(): Promise<Reserva[]> {
   }));
 }
 
-// INSOFT-40/41: solicitudes pendientes de la bandeja del rol de la sesión (RN05).
+// INSOFT-37/38: solicitudes pendientes de la bandeja del rol de la sesión (RN05).
 export async function bandejaPendiente(): Promise<SolicitudPendiente[]> {
   const { data, error } = await supabase.schema('reservas').rpc('bandeja_pendiente');
   if (error) throw errorDeReserva(error, 'No se pudo cargar la bandeja.');

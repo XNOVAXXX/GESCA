@@ -8,7 +8,7 @@ import { useRequiereRol } from '@/microservicios/usuarios';
 
 const APRUEBAN = ['admin', 'coordinador'] as const;
 
-// INSOFT-40 (bandeja del Administrador) e INSOFT-41 / HU03 (bandeja del Coordinador).
+// INSOFT-37 (bandeja del Administrador) e INSOFT-38 / HU03 (bandeja del Coordinador).
 // Cada rol ve solo las solicitudes que le enruta RN05; rechazar exige justificación (RN04).
 export function useBandeja() {
   const { perfil, cargando: verificando } = useRequiereRol(APRUEBAN);

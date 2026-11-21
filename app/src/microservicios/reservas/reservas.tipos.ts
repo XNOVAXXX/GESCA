@@ -16,7 +16,7 @@ export interface ResultadoRadicacion {
   bandeja: Bandeja;
 }
 
-// Una reserva del usuario de la sesión (INSOFT-32).
+// Una reserva del usuario de la sesión (INSOFT-34).
 export interface Reserva {
   id: string;
   espacioId: string;
@@ -29,7 +29,7 @@ export interface Reserva {
   motivoDecision: string | null;
 }
 
-// Una solicitud que espera decisión en la bandeja del Administrador o del Coordinador (INSOFT-40/41).
+// Una solicitud que espera decisión en la bandeja del Administrador o del Coordinador (INSOFT-37/38).
 export interface SolicitudPendiente {
   id: string;
   espacioNombre: string;

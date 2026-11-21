@@ -29,7 +29,7 @@ export function useSolicitarReserva() {
   const [ocupadas, setOcupadas] = useState<Franja[]>([]);
   const [version, setVersion] = useState(0);
 
-  // RF02: horarios ya ocupados del espacio en el día elegido, para no pedir uno que se cruce (RN01).
+  // RF02 / INSOFT-32: horarios ya ocupados del espacio en el día elegido, para no pedir uno que se cruce (RN01).
   useEffect(() => {
     const dia = dias.find((d) => claveDia(d) === fecha);
     if (!espacioId || !dia) return;

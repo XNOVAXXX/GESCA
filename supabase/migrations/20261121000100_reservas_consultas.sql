@@ -1,6 +1,6 @@
 -- =====================================================================
--- Consultas de RESERVAS para la app: "Mis reservas" (INSOFT-32) y las
--- bandejas de aprobación del Administrador y del Coordinador (INSOFT-40/41).
+-- Consultas de RESERVAS para la app: "Mis reservas" (INSOFT-34) y las
+-- bandejas de aprobación del Administrador y del Coordinador (INSOFT-37/38).
 --
 -- La API REST no puede unir tablas de esquemas distintos, así que estas
 -- funciones devuelven la reserva junto con el nombre del espacio y del
