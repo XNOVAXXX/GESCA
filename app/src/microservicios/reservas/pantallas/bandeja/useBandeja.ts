@@ -75,6 +75,7 @@ export function useBandeja() {
         espacio: s.espacioNombre,
         horario: franja(s.inicio, s.fin),
         motivoUso: s.motivoUso,
+        recursos: s.recursos,
         solicitante: `${s.responsableNombre} · ${s.responsableCorreo}`,
         enMantenimiento: s.espacioEnMantenimiento,
       })),

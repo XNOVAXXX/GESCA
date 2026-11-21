@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { mensajeDe } from '@/compartido/errores';
 import { diasReservables, validarSolicitud } from '@/microservicios/reservas/reservas.reglas';
-import { ocupacionDelDia, radicarSolicitud } from '@/microservicios/reservas/reservas.api';
+import { escucharOcupacion, ocupacionDelDia, radicarSolicitud } from '@/microservicios/reservas/reservas.api';
 import { claveDia, diaCorto, hora } from '@/microservicios/reservas/reservas.formato';
 import type { Franja } from '@/microservicios/reservas/reservas.tipos';
+import { itemsDelEspacio, type Item } from '@/microservicios/espacios';
 import { useSesion } from '@/microservicios/usuarios';
 
 // Convierte "AAAA-MM-DD" + "HH:MM" en fecha local; null si el formato no es válido.
@@ -28,6 +29,33 @@ export function useSolicitarReserva() {
   const [confirmacion, setConfirmacion] = useState<string | null>(null);
   const [ocupadas, setOcupadas] = useState<Franja[]>([]);
   const [version, setVersion] = useState(0);
+  const [items, setItems] = useState<Item[]>([]);
+  const [cantidades, setCantidades] = useState<Record<string, number>>({});
+
+  // HU01: recursos que ofrece el espacio (micrófonos, sillas…), para pedirlos con la reserva.
+  useEffect(() => {
+    if (!espacioId) return;
+    let vigente = true;
+    itemsDelEspacio(espacioId)
+      .then((lista) => {
+        if (vigente) setItems(lista.filter((i) => i.cantidad > 0));
+      })
+      .catch(() => {
+        if (vigente) setItems([]);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [espacioId]);
+
+  // INSOFT-36: si otra persona reserva este espacio, los horarios ocupados se actualizan solos.
+  useEffect(
+    () =>
+      escucharOcupacion((id) => {
+        if (!id || id === espacioId) setVersion((v) => v + 1);
+      }),
+    [espacioId],
+  );
 
   // RF02 / INSOFT-32: horarios ya ocupados del espacio en el día elegido, para no pedir uno que se cruce (RN01).
   useEffect(() => {
@@ -55,7 +83,13 @@ export function useSolicitarReserva() {
       return;
     }
 
-    const solicitud = { espacioId, inicio, fin, motivoUso };
+    const solicitud = {
+      espacioId,
+      inicio,
+      fin,
+      motivoUso,
+      items: Object.entries(cantidades).map(([itemId, cantidad]) => ({ itemId, cantidad })),
+    };
     const encontrados = validarSolicitud(solicitud);
     setErrores(encontrados);
     if (encontrados.length > 0) return; // HU01 escenario 2: el formulario sigue en edición
@@ -76,6 +110,7 @@ export function useSolicitarReserva() {
           : 'Solicitud radicada en estado Pendiente.',
       );
       setMotivoUso('');
+      setCantidades({});
       setVersion((v) => v + 1);
     } catch (e) {
       setErrores([mensajeDe(e, 'No se pudo radicar la solicitud.')]);
@@ -104,6 +139,16 @@ export function useSolicitarReserva() {
     enviando,
     confirmacion,
     enviar,
+    recursos: items.map((i) => ({ id: i.id, nombre: i.nombre, disponibles: i.cantidad, pedidos: cantidades[i.id] ?? 0 })),
+    ajustarRecurso: (id: string, delta: number) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+      setCantidades((c) => {
+        const nueva = Math.min(item.cantidad, Math.max(0, (c[id] ?? 0) + delta));
+        const { [id]: _anterior, ...resto } = c;
+        return nueva > 0 ? { ...resto, [id]: nueva } : resto;
+      });
+    },
     correoVerificado: perfil?.correo ?? null,
     verMisReservas: () => router.push('/reservas/mias'),
   };

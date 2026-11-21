@@ -145,4 +145,38 @@ export const styles = StyleSheet.create({
     ...typography.pequeno,
     color: colors.superficie,
   },
+  filaItem: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderBottomColor: colors.borde,
+    borderBottomWidth: 1,
+  },
+  nombreItem: {
+    ...typography.cuerpo,
+    color: colors.texto,
+    flexShrink: 1,
+  },
+  cantidadItem: {
+    ...typography.subtitulo,
+    color: colors.texto,
+    minWidth: 32,
+    textAlign: 'center',
+  },
+  filaNuevoItem: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  campoNombreItem: {
+    flex: 1,
+    marginBottom: spacing.sm,
+  },
+  campoCantidadItem: {
+    width: 80,
+    marginBottom: spacing.sm,
+  },
 });

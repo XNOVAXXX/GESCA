@@ -23,3 +23,19 @@ export function validarMotivo(motivo: string): string | null {
 export function mismoNombre(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
+
+// INSOFT-30: un recurso necesita nombre y una cantidad entera de 1 o más.
+export function validarItem(nombre: string, cantidad: string): string | null {
+  if (!nombre.trim()) return 'Escribe el nombre del recurso.';
+  if (!/^\d+$/.test(cantidad.trim()) || Number(cantidad) < 1) return 'La cantidad debe ser un número entero de 1 o más.';
+  return null;
+}
+
+// INSOFT-32: filtros del calendario. Una capacidad vacía o inválida no filtra.
+export function filtrarEspacios<T extends { tipo: string; capacidad_max: number }>(
+  espacios: T[],
+  filtro: { tipo: string | null; capacidad: string },
+): T[] {
+  const minima = /^\d+$/.test(filtro.capacidad.trim()) ? Number(filtro.capacidad) : 0;
+  return espacios.filter((e) => (!filtro.tipo || e.tipo === filtro.tipo) && e.capacidad_max >= minima);
+}

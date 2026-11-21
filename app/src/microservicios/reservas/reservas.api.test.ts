@@ -101,3 +101,22 @@ describe('Mis reservas y bandejas (INSOFT-34, 35, 37, 38)', () => {
     expect(franjas.map((f) => f.estado)).toEqual(['aprobada', 'pendiente']);
   });
 });
+
+describe('Solicitar con recursos (HU01, INSOFT-33)', () => {
+  it('envía solo los recursos pedidos, con el formato del servicio', async () => {
+    invoke.mockResolvedValue({ data: { id: 'r1', estado: 'pendiente', bandeja: 'administrador' }, error: null });
+    await radicarSolicitud({
+      espacioId: 'e1',
+      inicio: new Date('2026-11-24T13:00:00Z'),
+      fin: new Date('2026-11-24T15:00:00Z'),
+      motivoUso: 'Conferencia',
+      items: [
+        { itemId: 'mic', cantidad: 2 },
+        { itemId: 'silla', cantidad: 0 },
+      ],
+    });
+    expect(invoke).toHaveBeenCalledWith('svc-reservas', {
+      body: expect.objectContaining({ items: [{ item_id: 'mic', cantidad: 2 }] }),
+    });
+  });
+});

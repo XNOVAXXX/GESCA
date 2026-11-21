@@ -8,6 +8,8 @@ export interface SolicitudReserva {
   inicio: Date;
   fin: Date;
   motivoUso: string;
+  // HU01: recursos del espacio que se piden con la reserva (micrófonos, sillas…).
+  items?: { itemId: string; cantidad: number }[];
 }
 
 export interface ResultadoRadicacion {
@@ -27,6 +29,7 @@ export interface Reserva {
   estado: EstadoReserva;
   bandeja: Bandeja;
   motivoDecision: string | null;
+  recursos: string | null;
 }
 
 // Una solicitud que espera decisión en la bandeja del Administrador o del Coordinador (INSOFT-37/38).
@@ -40,10 +43,12 @@ export interface SolicitudPendiente {
   responsableNombre: string;
   responsableCorreo: string;
   bandeja: Bandeja;
+  recursos: string | null;
 }
 
 // Franja ocupada de un espacio, sin datos personales (RF02).
 export interface Franja {
+  espacioId: string;
   inicio: Date;
   fin: Date;
   estado: EstadoReserva;

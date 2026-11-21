@@ -89,4 +89,44 @@ export const styles = StyleSheet.create({
     color: colors.exito,
     marginBottom: spacing.md,
   },
+  filaRecurso: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  nombreRecurso: {
+    ...typography.cuerpo,
+    color: colors.texto,
+    flexShrink: 1,
+  },
+  disponibles: {
+    ...typography.pequeno,
+    color: colors.textoSuave,
+  },
+  contador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  botonContador: {
+    borderColor: colors.primario,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textoContador: {
+    ...typography.subtitulo,
+    color: colors.primario,
+  },
+  cantidad: {
+    ...typography.subtitulo,
+    color: colors.texto,
+    minWidth: 24,
+    textAlign: 'center',
+  },
 });

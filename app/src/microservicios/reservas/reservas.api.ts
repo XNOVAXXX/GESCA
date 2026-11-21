@@ -21,6 +21,9 @@ export async function radicarSolicitud(s: SolicitudReserva): Promise<ResultadoRa
       inicio: s.inicio.toISOString(),
       fin: s.fin.toISOString(),
       motivo_uso: s.motivoUso,
+      items: (s.items ?? [])
+        .filter((i) => i.cantidad > 0)
+        .map((i) => ({ item_id: i.itemId, cantidad: i.cantidad })),
     },
   });
 
@@ -58,6 +61,7 @@ interface FilaReserva {
   estado: EstadoReserva;
   bandeja: Bandeja;
   motivo_decision: string | null;
+  recursos: string | null;
 }
 
 interface FilaPendiente {
@@ -70,6 +74,7 @@ interface FilaPendiente {
   responsable_nombre: string;
   responsable_correo: string;
   bandeja: Bandeja;
+  recursos: string | null;
 }
 
 // INSOFT-34: reservas del usuario de la sesión (función reservas.mis_reservas).
@@ -86,6 +91,7 @@ export async function misReservas(): Promise<Reserva[]> {
     estado: f.estado,
     bandeja: f.bandeja,
     motivoDecision: f.motivo_decision,
+    recursos: f.recursos ?? null,
   }));
 }
 
@@ -103,6 +109,7 @@ export async function bandejaPendiente(): Promise<SolicitudPendiente[]> {
     responsableNombre: f.responsable_nombre,
     responsableCorreo: f.responsable_correo,
     bandeja: f.bandeja,
+    recursos: f.recursos ?? null,
   }));
 }
 
@@ -123,16 +130,37 @@ export const aprobar = (id: string) => decidir(id, 'aprobada', null);
 export const rechazar = (id: string, motivo: string) => decidir(id, 'rechazada', motivo);
 export const cancelar = (id: string, motivo: string) => decidir(id, 'cancelada', motivo);
 
-// RF02: franjas ocupadas (pendientes o aprobadas) de un espacio en un día, sin datos personales.
-export async function ocupacionDelDia(espacioId: string, dia: Date): Promise<Franja[]> {
-  const desde = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate());
-  const hasta = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate() + 1);
+// RF02: franjas ocupadas (pendientes o aprobadas) de todos los espacios entre dos fechas,
+// sin datos personales. Funciona sin sesión (calendario público).
+export async function ocupacionEntre(desde: Date, hasta: Date): Promise<Franja[]> {
   const { data, error } = await supabase
     .schema('reservas')
     .rpc('ocupacion', { p_desde: desde.toISOString(), p_hasta: hasta.toISOString() });
   if (error) throw errorDeReserva(error, 'No se pudo consultar la ocupación.');
   return ((data ?? []) as { espacio_id: string; inicio: string; fin: string; estado: EstadoReserva }[])
-    .filter((f) => f.espacio_id === espacioId)
-    .map((f) => ({ inicio: new Date(f.inicio), fin: new Date(f.fin), estado: f.estado }))
+    .map((f) => ({ espacioId: f.espacio_id, inicio: new Date(f.inicio), fin: new Date(f.fin), estado: f.estado }))
     .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+}
+
+// Franjas ocupadas de un espacio en un día (hora local).
+export async function ocupacionDelDia(espacioId: string, dia: Date): Promise<Franja[]> {
+  const desde = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate());
+  const hasta = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate() + 1);
+  return (await ocupacionEntre(desde, hasta)).filter((f) => f.espacioId === espacioId);
+}
+
+// INSOFT-36: avisa cuando alguien radica, aprueba, rechaza o cancela una reserva, para refrescar
+// el calendario sin recargar. La base de datos publica en el canal "ocupacion" de Supabase Realtime
+// (trigger reservas.avisar_ocupacion). Devuelve la función para dejar de escuchar.
+export function escucharOcupacion(alCambiar: (espacioId: string | null) => void): () => void {
+  const canal = supabase
+    .channel('ocupacion')
+    .on('broadcast', { event: 'cambio' }, (mensaje) => {
+      const espacioId = (mensaje.payload as { espacio_id?: string } | undefined)?.espacio_id ?? null;
+      alCambiar(espacioId);
+    })
+    .subscribe();
+  return () => {
+    void supabase.removeChannel(canal);
+  };
 }
