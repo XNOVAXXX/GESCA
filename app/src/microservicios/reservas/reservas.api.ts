@@ -1,10 +1,10 @@
 // Microservicio de RESERVAS: radica solicitudes (Edge Function svc-reservas), consulta las reservas
 // propias y las bandejas, y registra decisiones. Las reglas las hace cumplir la base de datos.
 import { FunctionsHttpError } from '@supabase/supabase-js';
+import { invocarServicio } from '@/compartido/servicios';
 import { supabase } from '@/compartido/supabase';
 import type {
   Bandeja,
-  Decision,
   EstadoReserva,
   Franja,
   Reserva,
@@ -113,22 +113,19 @@ export async function bandejaPendiente(): Promise<SolicitudPendiente[]> {
   }));
 }
 
-// Cambia el estado de una reserva. El trigger reservas.validar_cambio_estado revisa la transición,
-// el rol según la bandeja y las 24 horas para cancelar.
-async function decidir(id: string, estado: Decision, motivo: string | null): Promise<void> {
-  const { data, error } = await supabase
-    .schema('reservas')
-    .from('reservas')
-    .update({ estado, motivo_decision: motivo?.trim() || null })
-    .eq('id', id)
-    .select('id');
-  if (error) throw errorDeReserva(error, 'No se pudo guardar la decisión.');
-  if (!data || data.length === 0) throw new Error('No tienes permiso para cambiar esta reserva o ya no existe.');
+// Aprobar, rechazar y cancelar pasan por el microservicio svc-aprobaciones (INSOFT-39), que además
+// avisa por correo al solicitante (INSOFT-40). La base de datos valida transición, rol, bandeja y 24 horas.
+async function decidir(accion: 'aprobar' | 'rechazar' | 'cancelar', id: string, motivo: string | null): Promise<void> {
+  await invocarServicio(
+    'svc-aprobaciones',
+    { accion, reserva_id: id, motivo: motivo?.trim() || null },
+    'No se pudo guardar la decisión.',
+  );
 }
 
-export const aprobar = (id: string) => decidir(id, 'aprobada', null);
-export const rechazar = (id: string, motivo: string) => decidir(id, 'rechazada', motivo);
-export const cancelar = (id: string, motivo: string) => decidir(id, 'cancelada', motivo);
+export const aprobar = (id: string) => decidir('aprobar', id, null);
+export const rechazar = (id: string, motivo: string) => decidir('rechazar', id, motivo);
+export const cancelar = (id: string, motivo: string) => decidir('cancelar', id, motivo);
 
 // RF02: franjas ocupadas (pendientes o aprobadas) de todos los espacios entre dos fechas,
 // sin datos personales. Funciona sin sesión (calendario público).
