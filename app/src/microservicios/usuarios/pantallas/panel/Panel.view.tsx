@@ -23,6 +23,11 @@ export function PanelView(p: PanelProps) {
         <Text style={styles.rol}>{p.rol}</Text>
       </View>
 
+      {p.puedeAprobar && (
+        <Pressable style={styles.boton} onPress={p.verBandeja} accessibilityRole="button">
+          <Text style={styles.textoBoton}>Bandeja de aprobación</Text>
+        </Pressable>
+      )}
       {p.puedeGestionarUsuarios && (
         <Pressable style={styles.boton} onPress={p.gestionarUsuarios} accessibilityRole="button">
           <Text style={styles.textoBoton}>Usuarios y roles</Text>
@@ -33,8 +38,11 @@ export function PanelView(p: PanelProps) {
           <Text style={styles.textoBoton}>Gestionar espacios</Text>
         </Pressable>
       )}
+      <Pressable style={styles.boton} onPress={p.verMisReservas} accessibilityRole="button">
+        <Text style={styles.textoBoton}>Mis reservas</Text>
+      </Pressable>
       <Pressable style={styles.boton} onPress={p.verEspacios} accessibilityRole="button">
-        <Text style={styles.textoBoton}>Ver espacios</Text>
+        <Text style={styles.textoBoton}>Reservar un espacio</Text>
       </Pressable>
       <Pressable style={[styles.boton, styles.botonSecundario]} onPress={p.salir} accessibilityRole="button">
         <Text style={[styles.textoBoton, styles.textoBotonSecundario]}>Cerrar sesión</Text>

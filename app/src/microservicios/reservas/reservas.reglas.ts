@@ -24,3 +24,24 @@ export function validarSolicitud(s: SolicitudReserva, ahora = new Date()): strin
 
   return errores;
 }
+
+export const ANTICIPACION_MINIMA_CANCELAR_HORAS = 24; // RN06
+
+// RN06: una reserva pendiente o aprobada se cancela con mínimo 24 horas de anticipación.
+export function puedeCancelar(r: { estado: string; inicio: Date }, ahora = new Date()): boolean {
+  if (r.estado !== 'pendiente' && r.estado !== 'aprobada') return false;
+  return r.inicio.getTime() - ahora.getTime() >= ANTICIPACION_MINIMA_CANCELAR_HORAS * HORA_MS;
+}
+
+// RN04: rechazar o cancelar exige una justificación.
+export function validarJustificacion(motivo: string): string | null {
+  return motivo.trim() ? null : 'Escribe la justificación.';
+}
+
+// Días que se pueden reservar: desde hoy hasta 15 días después (RN06).
+export function diasReservables(ahora = new Date()): Date[] {
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  return Array.from({ length: ANTICIPACION_MAXIMA_DIAS + 1 }, (_, i) =>
+    new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + i),
+  );
+}

@@ -41,7 +41,7 @@ supabase/
   migrations/                     Un archivo por esquema: usuarios, espacios, reservas
   functions/svc-reservas/         Edge Function del microservicio de reservas
   tests/usuarios/                 Prueba de acceso contra Supabase local
-  tests/reservas/                 Reglas RN01 a RN06 (pgTAP) y concurrencia
+  tests/reservas/                 Reglas RN01 a RN06, bandejas y mis reservas (pgTAP) y concurrencia
   templates/                      Correo con el código de acceso
   seed.sql                        Espacios de ejemplo
 docs/                             Arquitectura, plan de desarrollo y análisis del stack
@@ -155,6 +155,19 @@ tenga el rol. La sesión se cierra sola tras 15 minutos sin actividad (RNF02).
 El administrador registra, edita y pone en mantenimiento los espacios desde **Mi panel → Gestionar espacios**
 (`/admin/espacios`). Poner un espacio en mantenimiento pide un motivo, y mientras siga así no recibe
 solicitudes ni aprobaciones (RN03).
+
+## Flujo de una reserva
+
+1. **Solicitar** (`/` → espacio → `/reservas/solicitar`): se elige el día con botones (hoy hasta 15 días
+   después), se ven los horarios ya ocupados de ese día y se escriben la hora de inicio, la de fin (máx. 2 h)
+   y el motivo. Sin sesión, la app pide el código al correo antes de radicar.
+2. **Aprobar o rechazar** (**Mi panel → Bandeja de aprobación**, `/aprobaciones/bandeja`): el administrador
+   ve las solicitudes que RN05 le envía a él y el coordinador las suyas. Rechazar pide una justificación.
+3. **Seguir y cancelar** (**Mi panel → Mis reservas**, `/reservas/mias`): el solicitante ve el estado de cada
+   reserva y la justificación cuando se rechaza. Puede cancelar con justificación hasta 24 h antes.
+
+Las consultas `reservas.mis_reservas()` y `reservas.bandeja_pendiente()` filtran por el usuario de la sesión;
+las decisiones pasan por el trigger `al_cambiar_estado`. Las pruebas están en `supabase/tests/reservas/consultas.test.sql`.
 
 Para el proyecto en la nube:
 

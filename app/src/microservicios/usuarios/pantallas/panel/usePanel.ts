@@ -6,7 +6,6 @@ import { useRequiereRol } from '@/microservicios/usuarios/useRequiereRol';
 const TODOS = ['admin', 'coordinador', 'solicitante'] as const;
 
 // INSOFT-26: panel después de ingresar. Cada rol ve solo las opciones que le corresponden.
-// Las bandejas de aprobación llegan con la épica de aprobaciones.
 export function usePanel() {
   const { perfil, cargando } = useRequiereRol(TODOS);
 
@@ -22,8 +21,11 @@ export function usePanel() {
     rol: perfil ? NOMBRE_ROL[perfil.rol] : '',
     puedeGestionarUsuarios: perfil?.rol === 'admin',
     puedeGestionarEspacios: perfil?.rol === 'admin',
+    puedeAprobar: perfil?.rol === 'admin' || perfil?.rol === 'coordinador',
     salir,
     verEspacios: () => router.push('/'),
+    verMisReservas: () => router.push('/reservas/mias'),
+    verBandeja: () => router.push('/aprobaciones/bandeja'),
     gestionarUsuarios: () => router.push('/admin/usuarios'),
     gestionarEspacios: () => router.push('/admin/espacios'),
   };
