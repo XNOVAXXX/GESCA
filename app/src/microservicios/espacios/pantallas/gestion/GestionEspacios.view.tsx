@@ -122,6 +122,9 @@ export function GestionEspaciosView(p: GestionEspaciosProps) {
               <Pressable style={[styles.botonPequeno, styles.botonContorno]} onPress={() => p.editar(e)} accessibilityRole="button">
                 <Text style={[styles.textoBotonPequeno, styles.textoSecundario]}>Editar</Text>
               </Pressable>
+              <Pressable style={[styles.botonPequeno, styles.botonContorno]} onPress={() => p.abrirRecursos(e)} accessibilityRole="button">
+                <Text style={[styles.textoBotonPequeno, styles.textoSecundario]}>Recursos ({e.items?.length ?? 0})</Text>
+              </Pressable>
               {e.enMantenimiento ? (
                 <Pressable
                   style={[styles.botonPequeno, styles.botonExito, p.guardando && styles.botonDeshabilitado]}
@@ -136,6 +139,73 @@ export function GestionEspaciosView(p: GestionEspaciosProps) {
                   <Text style={styles.textoBotonPequeno}>Poner en mantenimiento</Text>
                 </Pressable>
               )}
+            </View>
+          )}
+
+          {p.recursos?.espacioId === e.id && (
+            <View style={styles.panelMotivo}>
+              <Text style={styles.seccion}>Recursos y mobiliario</Text>
+              {(e.items ?? []).length === 0 && <Text style={styles.detalle}>Este espacio no tiene recursos registrados.</Text>}
+              {(e.items ?? []).map((item) => (
+                <View key={item.id} style={styles.filaItem}>
+                  <Text style={styles.nombreItem}>{item.nombre}</Text>
+                  <View style={styles.acciones}>
+                    <Pressable
+                      style={[styles.botonPequeno, styles.botonContorno, p.guardando && styles.botonDeshabilitado]}
+                      disabled={p.guardando || item.cantidad === 0}
+                      onPress={() => p.ajustarCantidad(e.id, item, -1)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Quitar una unidad de ${item.nombre}`}
+                    >
+                      <Text style={[styles.textoBotonPequeno, styles.textoSecundario]}>−</Text>
+                    </Pressable>
+                    <Text style={styles.cantidadItem}>{item.cantidad}</Text>
+                    <Pressable
+                      style={[styles.botonPequeno, styles.botonContorno, p.guardando && styles.botonDeshabilitado]}
+                      disabled={p.guardando}
+                      onPress={() => p.ajustarCantidad(e.id, item, 1)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Agregar una unidad de ${item.nombre}`}
+                    >
+                      <Text style={[styles.textoBotonPequeno, styles.textoSecundario]}>+</Text>
+                    </Pressable>
+                    <Pressable
+                      style={[styles.botonPequeno, styles.botonAdvertencia, p.guardando && styles.botonDeshabilitado]}
+                      disabled={p.guardando}
+                      onPress={() => p.quitarItem(e.id, item)}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.textoBotonPequeno}>Quitar</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+
+              <View style={styles.filaNuevoItem}>
+                <TextInput
+                  style={[styles.campo, styles.campoNombreItem]}
+                  value={p.recursos.nombre}
+                  onChangeText={p.setNombreItem}
+                  placeholder="Ej. Micrófono inalámbrico"
+                  placeholderTextColor={colors.textoSuave}
+                />
+                <TextInput
+                  style={[styles.campo, styles.campoCantidadItem]}
+                  value={p.recursos.cantidad}
+                  onChangeText={p.setCantidadItem}
+                  placeholder="Cant."
+                  placeholderTextColor={colors.textoSuave}
+                  keyboardType="number-pad"
+                />
+              </View>
+              <Pressable
+                style={[styles.botonPequeno, styles.botonExito, p.guardando && styles.botonDeshabilitado]}
+                disabled={p.guardando}
+                onPress={p.agregarItem}
+                accessibilityRole="button"
+              >
+                <Text style={styles.textoBotonPequeno}>Agregar recurso</Text>
+              </Pressable>
             </View>
           )}
         </View>

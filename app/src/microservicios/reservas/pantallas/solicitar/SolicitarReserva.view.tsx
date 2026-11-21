@@ -54,6 +54,40 @@ export function SolicitarReservaView(p: SolicitarReservaProps) {
         </View>
       </View>
 
+      {p.recursos.length > 0 && (
+        <View style={styles.ocupacion}>
+          <Text style={styles.etiqueta}>Recursos (opcional)</Text>
+          {p.recursos.map((r) => (
+            <View key={r.id} style={styles.filaRecurso}>
+              <Text style={styles.nombreRecurso}>
+                {r.nombre} <Text style={styles.disponibles}>({r.disponibles} disponibles)</Text>
+              </Text>
+              <View style={styles.contador}>
+                <Pressable
+                  style={styles.botonContador}
+                  disabled={r.pedidos === 0}
+                  onPress={() => p.ajustarRecurso(r.id, -1)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Pedir una unidad menos de ${r.nombre}`}
+                >
+                  <Text style={styles.textoContador}>−</Text>
+                </Pressable>
+                <Text style={styles.cantidad}>{r.pedidos}</Text>
+                <Pressable
+                  style={styles.botonContador}
+                  disabled={r.pedidos >= r.disponibles}
+                  onPress={() => p.ajustarRecurso(r.id, 1)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Pedir una unidad más de ${r.nombre}`}
+                >
+                  <Text style={styles.textoContador}>+</Text>
+                </Pressable>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
       <Text style={styles.etiqueta}>Motivo de uso</Text>
       <TextInput
         style={[styles.campo, styles.campoMultilinea]}

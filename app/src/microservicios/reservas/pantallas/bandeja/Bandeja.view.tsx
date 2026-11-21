@@ -31,6 +31,7 @@ export function BandejaView(p: BandejaProps) {
           <Text style={styles.detalle}>{s.horario}</Text>
           <Text style={styles.detalle}>{s.solicitante}</Text>
           <Text style={styles.motivo}>Motivo: {s.motivoUso}</Text>
+          {s.recursos && <Text style={styles.detalle}>Recursos: {s.recursos}</Text>}
           {s.enMantenimiento && (
             <Text style={styles.advertencia}>El espacio está en mantenimiento: no se puede aprobar.</Text>
           )}

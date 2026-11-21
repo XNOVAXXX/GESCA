@@ -153,17 +153,21 @@ Cada rol ve solo sus opciones en el panel, y las pantallas protegidas devuelven 
 tenga el rol. La sesión se cierra sola tras 15 minutos sin actividad (RNF02).
 
 El administrador registra, edita y pone en mantenimiento los espacios desde **Mi panel → Gestionar espacios**
-(`/admin/espacios`). Poner un espacio en mantenimiento pide un motivo, y mientras siga así no recibe
+(`/admin/espacios`). En **Recursos** de cada espacio registra los ítems y su cantidad. Poner un espacio en mantenimiento pide un motivo, y mientras siga así no recibe
 solicitudes ni aprobaciones (RN03).
 
 ## Flujo de una reserva
 
-1. **Solicitar** (`/` → espacio → `/reservas/solicitar`): se elige el día con botones (hoy hasta 15 días
-   después), se ven los horarios ya ocupados de ese día y se escriben la hora de inicio, la de fin (máx. 2 h)
-   y el motivo. Sin sesión, la app pide el código al correo antes de radicar.
-2. **Aprobar o rechazar** (**Mi panel → Bandeja de aprobación**, `/aprobaciones/bandeja`): el administrador
+1. **Consultar** (`/`): el calendario filtra por día, tipo de espacio y capacidad mínima, y muestra en cada
+   espacio sus franjas ocupadas. Los espacios en mantenimiento aparecen bloqueados. La ocupación se actualiza
+   sola cuando alguien reserva (Supabase Realtime, canal público `ocupacion`).
+2. **Solicitar** (`/reservas/solicitar`): se elige el día, se escriben la hora de inicio, la de fin (máx. 2 h)
+   y el motivo, y se piden los recursos del espacio (micrófonos, sillas…) sin pasar de los disponibles.
+   Sin sesión, la app pide el código al correo antes de radicar. `reservas.radicar()` guarda la reserva y sus
+   recursos en una sola transacción.
+3. **Aprobar o rechazar** (**Mi panel → Bandeja de aprobación**, `/aprobaciones/bandeja`): el administrador
    ve las solicitudes que RN05 le envía a él y el coordinador las suyas. Rechazar pide una justificación.
-3. **Seguir y cancelar** (**Mi panel → Mis reservas**, `/reservas/mias`): el solicitante ve el estado de cada
+4. **Seguir y cancelar** (**Mi panel → Mis reservas**, `/reservas/mias`): el solicitante ve el estado de cada
    reserva y la justificación cuando se rechaza. Puede cancelar con justificación hasta 24 h antes.
 
 Las consultas `reservas.mis_reservas()` y `reservas.bandeja_pendiente()` filtran por el usuario de la sesión;

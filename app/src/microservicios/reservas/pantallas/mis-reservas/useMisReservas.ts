@@ -70,6 +70,7 @@ export function useMisReservas() {
       espacio: r.espacioNombre,
       horario: franja(r.inicio, r.fin),
       motivoUso: r.motivoUso,
+      recursos: r.recursos,
       estado: r.estado,
       nombreEstado: NOMBRE_ESTADO_RESERVA[r.estado],
       aprueba: NOMBRE_BANDEJA[r.bandeja],

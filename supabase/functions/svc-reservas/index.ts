@@ -1,4 +1,4 @@
-// Microservicio de RESERVAS: radica solicitudes (RF03).
+// Microservicio de RESERVAS: radica solicitudes con sus recursos (RF03, HU01).
 // Las reglas (cruces, 2 horas, 15 días, mantenimiento, enrutamiento) las aplica la base de
 // datos; este servicio identifica al usuario y traduce los errores a mensajes claros.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -21,12 +21,14 @@ interface Solicitud {
   inicio?: string;
   fin?: string;
   motivo_uso?: string;
+  items?: { item_id: string; cantidad: number }[];
 }
 
 function mensajeDeError(code: string | undefined, message: string): string {
   if (code === '23P01') return 'El espacio ya está reservado en esa franja horaria.';
   if (code === '23514' && message.includes('duracion_maxima')) return 'El límite máximo por evento es de 2 horas.';
   if (code === 'P0001') return message; // mensajes escritos en los triggers
+  if (code === '23505') return 'Un recurso aparece repetido en la solicitud.';
   return 'No se pudo radicar la solicitud.';
 }
 
@@ -52,16 +54,18 @@ Deno.serve(async (req) => {
     return responder(400, { error: 'Faltan datos: espacio, inicio, fin y motivo de uso.' });
   }
 
+  const items = Array.isArray(s.items) ? s.items.filter((i) => i?.item_id && Number(i.cantidad) > 0) : [];
+
+  // reservas.radicar guarda la reserva y sus recursos en una sola transacción.
   const { data, error } = await supabase
     .schema('reservas')
-    .from('reservas')
-    .insert({
-      espacio_id: s.espacio_id,
-      responsable_id: auth.user.id,
-      franja: `[${s.inicio},${s.fin})`,
-      motivo_uso: s.motivo_uso.trim(),
+    .rpc('radicar', {
+      p_espacio_id: s.espacio_id,
+      p_inicio: s.inicio,
+      p_fin: s.fin,
+      p_motivo_uso: s.motivo_uso.trim(),
+      p_items: items,
     })
-    .select('id, estado, bandeja')
     .single();
 
   if (error) return responder(409, { error: mensajeDeError(error.code, error.message) });

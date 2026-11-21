@@ -42,6 +42,7 @@ export function MisReservasView(p: MisReservasProps) {
           <Text style={styles.detalle}>
             {r.motivoUso} · Aprueba {r.aprueba}
           </Text>
+          {r.recursos && <Text style={styles.detalle}>Recursos: {r.recursos}</Text>}
           {r.motivoDecision && <Text style={styles.motivo}>Justificación: {r.motivoDecision}</Text>}
           {r.sinCancelacion && (
             <Text style={styles.advertencia}>Faltan menos de 24 horas: ya no se puede cancelar.</Text>

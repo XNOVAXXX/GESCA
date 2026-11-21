@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { mensajeDe } from '@/compartido/errores';
 import {
+  cambiarCantidad,
   crearEspacio,
+  crearItem,
+  eliminarItem,
   editarEspacio,
   listarEspacios,
   ponerEnMantenimiento,
   reactivarEspacio,
 } from '@/microservicios/espacios/espacios.api';
-import { mismoNombre, validarEspacio, validarMotivo } from '@/microservicios/espacios/espacios.reglas';
-import { NOMBRE_ESTADO, NOMBRE_TIPO, type Espacio, type TipoEspacio } from '@/microservicios/espacios/espacios.tipos';
+import { mismoNombre, validarEspacio, validarItem, validarMotivo } from '@/microservicios/espacios/espacios.reglas';
+import { NOMBRE_ESTADO, NOMBRE_TIPO, type Espacio, type Item, type TipoEspacio } from '@/microservicios/espacios/espacios.tipos';
 import { useRequiereRol } from '@/microservicios/usuarios';
 
 const SOLO_ADMIN = ['admin'] as const;
@@ -23,7 +26,8 @@ interface Formulario {
 
 const VACIO: Formulario = { id: null, nombre: '', tipo: 'auditorio', capacidad: '' };
 
-// INSOFT-28 (registrar, editar, listar e inhabilitar espacios) y HU02 / INSOFT-29 (mantenimiento con motivo).
+// INSOFT-28 (registrar, editar, listar e inhabilitar espacios), HU02 / INSOFT-29 (mantenimiento con motivo)
+// e INSOFT-30 (recursos y mobiliario de cada espacio).
 export function useGestionEspacios() {
   const { perfil, cargando: verificando } = useRequiereRol(SOLO_ADMIN);
   const [espacios, setEspacios] = useState<Espacio[]>([]);
@@ -33,6 +37,7 @@ export function useGestionEspacios() {
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [recursos, setRecursos] = useState<{ espacioId: string; nombre: string; cantidad: string } | null>(null);
 
   useEffect(() => {
     if (!perfil) return;
@@ -52,9 +57,21 @@ export function useGestionEspacios() {
     };
   }, [perfil]);
 
+  // Conserva los recursos que ya se habían cargado: editar o cambiar el estado no los trae de vuelta.
   const reemplazar = (espacio: Espacio) =>
+    setEspacios((lista) => {
+      const anterior = lista.find((e) => e.id === espacio.id);
+      const actualizado = { ...espacio, items: espacio.items ?? anterior?.items ?? [] };
+      return [...lista.filter((e) => e.id !== espacio.id), actualizado].sort((a, b) => a.nombre.localeCompare(b.nombre));
+    });
+
+  const cambiarItems = (espacioId: string, cambio: (items: Item[]) => Item[]) =>
     setEspacios((lista) =>
-      [...lista.filter((e) => e.id !== espacio.id), espacio].sort((a, b) => a.nombre.localeCompare(b.nombre)),
+      lista.map((e) =>
+        e.id === espacioId
+          ? { ...e, items: cambio(e.items ?? []).sort((a, b) => a.nombre.localeCompare(b.nombre)) }
+          : e,
+      ),
     );
 
   const ejecutar = async (accion: () => Promise<string>) => {
@@ -127,6 +144,40 @@ export function useGestionEspacios() {
       return `${actualizado.nombre} vuelve a recibir reservas.`;
     });
 
+  const agregarItem = () => {
+    if (!recursos) return;
+    const invalido = validarItem(recursos.nombre, recursos.cantidad);
+    if (invalido) {
+      setAviso(null);
+      setError(invalido);
+      return;
+    }
+    const { espacioId, nombre, cantidad } = recursos;
+    void ejecutar(async () => {
+      const item = await crearItem(espacioId, nombre, Number(cantidad));
+      cambiarItems(espacioId, (items) => [...items, item]);
+      setRecursos({ espacioId, nombre: '', cantidad: '' });
+      return `Se agregó ${item.nombre}.`;
+    });
+  };
+
+  const ajustarCantidad = (espacioId: string, item: Item, delta: number) => {
+    const cantidad = item.cantidad + delta;
+    if (cantidad < 0) return;
+    void ejecutar(async () => {
+      const actualizado = await cambiarCantidad(item.id, cantidad);
+      cambiarItems(espacioId, (items) => items.map((i) => (i.id === item.id ? actualizado : i)));
+      return `${actualizado.nombre}: ${actualizado.cantidad} disponibles.`;
+    });
+  };
+
+  const quitarItem = (espacioId: string, item: Item) =>
+    void ejecutar(async () => {
+      await eliminarItem(item.id);
+      cambiarItems(espacioId, (items) => items.filter((i) => i.id !== item.id));
+      return `Se quitó ${item.nombre}.`;
+    });
+
   const filas = useMemo(
     () =>
       espacios.map((e) => ({
@@ -160,6 +211,17 @@ export function useGestionEspacios() {
     confirmarMantenimiento,
     cancelarMantenimiento: () => setMantenimiento(null),
     reactivar,
+    recursos,
+    abrirRecursos: (espacio: Espacio) => {
+      setError(null);
+      setAviso(null);
+      setRecursos((r) => (r?.espacioId === espacio.id ? null : { espacioId: espacio.id, nombre: '', cantidad: '' }));
+    },
+    setNombreItem: (nombre: string) => setRecursos((r) => (r ? { ...r, nombre } : r)),
+    setCantidadItem: (cantidad: string) => setRecursos((r) => (r ? { ...r, cantidad } : r)),
+    agregarItem,
+    ajustarCantidad,
+    quitarItem,
     error,
     aviso,
     guardando,
