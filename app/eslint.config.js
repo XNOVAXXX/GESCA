@@ -16,7 +16,7 @@ const reactNative = require('eslint-plugin-react-native');
 const MICROSERVICIOS = ['usuarios', 'espacios', 'reservas'];
 
 const sinDatos = [
-  { group: ['**/*.api', '@/compartido/supabase'], message: 'Solo los hooks (use*.ts) llaman a los *.api.ts.' },
+  { group: ['**/*.api', '@/compartido/supabase', '@/compartido/servicios'], message: 'Solo los hooks (use*.ts) llaman a los *.api.ts.' },
   { group: ['@supabase/*'], message: 'Solo los archivos *.api.ts usan Supabase.' },
 ];
 
@@ -66,7 +66,7 @@ module.exports = defineConfig([
   {
     files: ['src/**/use*.ts'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [...sinDiseno, { group: ['@supabase/*', '@/compartido/supabase'], message: 'Los hooks usan los *.api.ts, no Supabase directo.' }] }],
+      'no-restricted-imports': ['error', { patterns: [...sinDiseno, { group: ['@supabase/*', '@/compartido/supabase', '@/compartido/servicios'], message: 'Los hooks usan los *.api.ts, no Supabase directo.' }] }],
     },
   },
   {

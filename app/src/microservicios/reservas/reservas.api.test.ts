@@ -59,32 +59,28 @@ describe('Mis reservas y bandejas (INSOFT-34, 35, 37, 38)', () => {
     expect(r.estado).toBe('aprobada');
   });
 
-  it('aprobar cambia el estado a aprobada', async () => {
-    const { consulta } = simularBD({ data: [{ id: 'r1' }], error: null });
+  it('aprobar pasa por svc-aprobaciones (INSOFT-39)', async () => {
+    invoke.mockResolvedValue({ data: { id: 'r1', estado: 'aprobada', correo_enviado: true }, error: null });
     await aprobar('r1');
-    expect(consulta.update).toHaveBeenCalledWith({ estado: 'aprobada', motivo_decision: null });
-    expect(consulta.eq).toHaveBeenCalledWith('id', 'r1');
+    expect(invoke).toHaveBeenCalledWith('svc-aprobaciones', {
+      body: { accion: 'aprobar', reserva_id: 'r1', motivo: null },
+    });
   });
 
   it('rechazar envía la justificación sin espacios sobrantes', async () => {
-    const { consulta } = simularBD({ data: [{ id: 'r1' }], error: null });
+    invoke.mockResolvedValue({ data: { id: 'r1', estado: 'rechazada' }, error: null });
     await rechazar('r1', '  Evento institucional  ');
-    expect(consulta.update).toHaveBeenCalledWith({ estado: 'rechazada', motivo_decision: 'Evento institucional' });
+    expect(invoke).toHaveBeenCalledWith('svc-aprobaciones', {
+      body: { accion: 'rechazar', reserva_id: 'r1', motivo: 'Evento institucional' },
+    });
   });
 
-  it('muestra el mensaje de la base de datos cuando faltan menos de 24 horas', async () => {
-    simularBD({
-      data: null,
-      error: { code: 'P0001', message: 'Solo se puede cancelar con mínimo 24 horas de anticipación.' },
-    });
+  it('muestra el mensaje del servicio cuando faltan menos de 24 horas', async () => {
+    const respuesta = { json: async () => ({ error: 'Solo se puede cancelar con mínimo 24 horas de anticipación.' }) };
+    invoke.mockResolvedValue({ data: null, error: new FunctionsHttpError(respuesta) });
     await expect(cancelar('r1', 'Ya no se necesita')).rejects.toThrow(
       'Solo se puede cancelar con mínimo 24 horas de anticipación.',
     );
-  });
-
-  it('avisa cuando la reserva no se pudo cambiar por permisos', async () => {
-    simularBD({ data: [], error: null });
-    await expect(aprobar('r1')).rejects.toThrow('No tienes permiso para cambiar esta reserva o ya no existe.');
   });
 
   it('la ocupación del día solo trae el espacio pedido, ordenada por hora', async () => {

@@ -17,8 +17,9 @@ base de datos, su Edge Function cuando necesita lógica de servidor y su propio 
 | Microservicio | Base de datos | Edge Function | Módulo de la app |
 |---|---|---|---|
 | Usuarios | esquema `usuarios` + Supabase Auth | (usa Auth directo) | `app/src/microservicios/usuarios/` |
-| Espacios | esquema `espacios` | (lectura directa con RLS) | `app/src/microservicios/espacios/` |
-| Reservas | esquema `reservas` | `svc-reservas` | `app/src/microservicios/reservas/` |
+| Espacios | esquema `espacios` | `svc-espacios` (crear, editar, mantenimiento, recursos); lectura directa con RLS | `app/src/microservicios/espacios/` |
+| Reservas | esquema `reservas` | `svc-reservas` (radicar) y `svc-aprobaciones` (aprobar, rechazar, cancelar) | `app/src/microservicios/reservas/` |
+| Notificaciones | (lee `reservas`, `espacios` y `usuarios`) | `svc-notificaciones` (correo al cambiar de estado) | (lo llama `svc-aprobaciones`) |
 
 ```
 app/                              App Expo (web, Android, iOS)
@@ -39,7 +40,8 @@ app/                              App Expo (web, Android, iOS)
   Dockerfile, nginx.conf          Imagen de la app web
 supabase/
   migrations/                     Un archivo por esquema: usuarios, espacios, reservas
-  functions/svc-reservas/         Edge Function del microservicio de reservas
+  functions/svc-*/                Edge Functions: svc-reservas, svc-espacios, svc-aprobaciones, svc-notificaciones
+  functions/_compartido/          Código que comparten las Edge Functions
   tests/usuarios/                 Prueba de acceso contra Supabase local
   tests/reservas/                 Reglas RN01 a RN06, bandejas y mis reservas (pgTAP) y concurrencia
   templates/                      Correo con el código de acceso
@@ -172,6 +174,18 @@ solicitudes ni aprobaciones (RN03).
 
 Las consultas `reservas.mis_reservas()` y `reservas.bandeja_pendiente()` filtran por el usuario de la sesión;
 las decisiones pasan por el trigger `al_cambiar_estado`. Las pruebas están en `supabase/tests/reservas/consultas.test.sql`.
+
+### Edge Functions en la nube
+
+Cada cambio de las funciones se publica desde la raíz del repo:
+
+```bash
+npx supabase functions deploy svc-reservas svc-espacios svc-aprobaciones svc-notificaciones
+```
+
+Para que `svc-notificaciones` envíe los correos (INSOFT-40), en Supabase → Edge Functions → **Secrets**
+se agregan `SMTP_HOST` (`smtp.gmail.com`), `SMTP_PORT` (`465`), `SMTP_USER` (el correo) y `SMTP_PASS`
+(la contraseña de aplicación de Gmail). Sin esos secretos todo funciona igual, solo que no se envía el correo.
 
 Para el proyecto en la nube:
 
