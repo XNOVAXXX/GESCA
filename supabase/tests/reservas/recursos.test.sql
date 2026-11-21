@@ -33,9 +33,10 @@ select lives_ok($$
   'el administrador registra recursos con su cantidad');
 
 select pg_temp.como('00000000-0000-0000-0000-0000000000e1');
-select is((select count(*)::int from espacios.items), 3, 'cualquiera puede ver los recursos');
-update espacios.items set cantidad = 99;
-select is((select max(cantidad) from espacios.items), 6, 'un solicitante no puede cambiar los recursos');
+select is((select count(*)::int from espacios.items where id::text like '30000000-%'), 3,
+  'cualquiera puede ver los recursos');
+update espacios.items set cantidad = 99 where id::text like '30000000-%';
+select is((select max(cantidad) from espacios.items where id::text like '30000000-%'), 6, 'un solicitante no puede cambiar los recursos');
 
 -- ------------------------------------------------------ HU01 con recursos
 select lives_ok($$
