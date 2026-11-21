@@ -12,8 +12,36 @@ export function SolicitarReservaView(p: SolicitarReservaProps) {
         <Text style={styles.aviso}>Al radicar te pediremos verificar tu correo con un código.</Text>
       )}
 
-      <Text style={styles.etiqueta}>Fecha (AAAA-MM-DD)</Text>
-      <TextInput style={styles.campo} value={p.fecha} onChangeText={p.setFecha} placeholder="2026-10-20" placeholderTextColor={colors.textoSuave} />
+      <Text style={styles.etiqueta}>Día (máximo 15 días de anticipación)</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dias}>
+        {p.dias.map((d) => {
+          const activo = d.clave === p.fecha;
+          return (
+            <Pressable
+              key={d.clave}
+              style={[styles.dia, activo && styles.diaActivo]}
+              onPress={() => p.setFecha(d.clave)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: activo }}
+            >
+              <Text style={[styles.textoDia, activo && styles.textoDiaActivo]}>{d.texto}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <View style={styles.ocupacion}>
+        <Text style={styles.etiqueta}>Horarios ocupados ese día</Text>
+        {p.ocupadas.length === 0 ? (
+          <Text style={styles.libre}>El espacio está libre todo el día.</Text>
+        ) : (
+          p.ocupadas.map((f) => (
+            <Text key={f.clave} style={styles.ocupada}>
+              {f.texto} · {f.estado}
+            </Text>
+          ))
+        )}
+      </View>
 
       <View style={styles.fila}>
         <View style={styles.columna}>
@@ -39,7 +67,14 @@ export function SolicitarReservaView(p: SolicitarReservaProps) {
           {e}
         </Text>
       ))}
-      {p.confirmacion && <Text style={styles.confirmacion}>{p.confirmacion}</Text>}
+      {p.confirmacion && (
+        <View>
+          <Text style={styles.confirmacion}>{p.confirmacion}</Text>
+          <Pressable style={[styles.boton, styles.botonSecundario]} onPress={p.verMisReservas} accessibilityRole="button">
+            <Text style={[styles.textoBoton, styles.textoSecundario]}>Ver mis reservas</Text>
+          </Pressable>
+        </View>
+      )}
 
       <Pressable
         style={[styles.boton, p.enviando && styles.botonDeshabilitado]}

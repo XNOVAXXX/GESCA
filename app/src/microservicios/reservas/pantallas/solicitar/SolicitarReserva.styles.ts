@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, formulario, spacing, typography } from '@/compartido/tema';
+import { colors, formulario, radius, spacing, typography } from '@/compartido/tema';
 
 export const styles = StyleSheet.create({
   ...formulario,
@@ -37,6 +37,52 @@ export const styles = StyleSheet.create({
   error: {
     ...formulario.error,
     marginBottom: spacing.xs,
+  },
+  dias: {
+    gap: spacing.xs,
+    paddingBottom: spacing.md,
+  },
+  dia: {
+    borderColor: colors.primario,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  diaActivo: {
+    backgroundColor: colors.primario,
+  },
+  textoDia: {
+    ...typography.pequeno,
+    color: colors.primario,
+  },
+  textoDiaActivo: {
+    color: colors.superficie,
+  },
+  ocupacion: {
+    backgroundColor: colors.superficie,
+    borderColor: colors.borde,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  libre: {
+    ...typography.pequeno,
+    color: colors.exito,
+  },
+  ocupada: {
+    ...typography.pequeno,
+    color: colors.advertencia,
+  },
+  botonSecundario: {
+    backgroundColor: colors.superficie,
+    borderColor: colors.primario,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+  },
+  textoSecundario: {
+    color: colors.primario,
   },
   confirmacion: {
     ...typography.cuerpo,
